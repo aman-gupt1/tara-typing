@@ -28,7 +28,8 @@ import LessonSidebar from '../components/learn/LessonSidebar';
 import LessonNavigation from '../components/learn/LessonNavigation';
 
 export const LessonDetail = () => {
-  const { lessonId } = useParams();
+  const { lessonId, slug } = useParams();
+  const currentLessonId = slug || lessonId;
   const navigate = useNavigate();
   const {
     lessons: contextLessons,
@@ -44,19 +45,19 @@ export const LessonDetail = () => {
   const [showCompletionBanner, setShowCompletionBanner] = useState(false);
 
   const lessonIndex = useMemo(() => {
-    return lessons.findIndex((l) => l.id === lessonId || l.slug === lessonId);
-  }, [lessons, lessonId]);
+    return lessons.findIndex((l) => l.id === currentLessonId || l.slug === currentLessonId);
+  }, [lessons, currentLessonId]);
 
   const lesson = lessonIndex !== -1 ? lessons[lessonIndex] : null;
   const prevLesson = lessonIndex > 0 ? lessons[lessonIndex - 1] : null;
   const nextLesson = lessonIndex !== -1 && lessonIndex < lessons.length - 1 ? lessons[lessonIndex + 1] : null;
 
   useEffect(() => {
-    if (lessonId) {
-      setLastVisitedLesson(lessonId);
+    if (currentLessonId) {
+      setLastVisitedLesson(currentLessonId);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [lessonId, setLastVisitedLesson]);
+  }, [currentLessonId, setLastVisitedLesson]);
 
   if (!lesson) {
     return (

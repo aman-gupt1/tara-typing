@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { Github, Sparkles } from 'lucide-react';
 import SEO from '../components/common/SEO';
 import { useAuth } from '../context/AuthContext';
 
 export const Register = () => {
-  const { register, demoLogin } = useAuth();
+  const { register, demoLogin, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -18,6 +19,18 @@ export const Register = () => {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  const rawFrom = location.state?.from?.pathname
+    ? `${location.state.from.pathname}${location.state.from.search || ''}`
+    : null;
+  const from = (rawFrom && !rawFrom.startsWith('/login') && !rawFrom.startsWith('/register'))
+    ? rawFrom
+    : '/profile';
+
+  // If already authenticated, redirect to destination or profile
+  if (isAuthenticated) {
+    return <Navigate to={from} replace />;
+  }
 
   const validate = () => {
     const errs = {};
@@ -44,7 +57,7 @@ export const Register = () => {
     setLoading(true);
     try {
       await register(formData.name, formData.username, formData.email, formData.password);
-      navigate('/profile');
+      navigate(from, { replace: true });
     } catch (err) {
       setErrors({ form: err?.message || 'Registration failed.' });
     } finally {
@@ -55,7 +68,7 @@ export const Register = () => {
   const handleDemo = async () => {
     try {
       await demoLogin();
-      navigate('/profile');
+      navigate(from, { replace: true });
     } catch {
       // Handled in AuthContext
     }

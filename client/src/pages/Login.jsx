@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { Eye, EyeOff, Github, Sparkles } from 'lucide-react';
 import SEO from '../components/common/SEO';
 import { useAuth } from '../context/AuthContext';
 
 export const Login = () => {
-  const { login, demoLogin } = useAuth();
+  const { login, demoLogin, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -16,6 +17,18 @@ export const Login = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const rawFrom = location.state?.from?.pathname
+    ? `${location.state.from.pathname}${location.state.from.search || ''}`
+    : null;
+  const from = (rawFrom && !rawFrom.startsWith('/login') && !rawFrom.startsWith('/register'))
+    ? rawFrom
+    : '/profile';
+
+  // If already authenticated, redirect to destination or profile
+  if (isAuthenticated) {
+    return <Navigate to={from} replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,7 +40,7 @@ export const Login = () => {
     setLoading(true);
     try {
       await login(formData.id, formData.password);
-      navigate('/profile');
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err?.message || 'Invalid credentials.');
     } finally {
@@ -38,7 +51,7 @@ export const Login = () => {
   const handleDemo = async () => {
     try {
       await demoLogin();
-      navigate('/profile');
+      navigate(from, { replace: true });
     } catch {
       // Handled in AuthContext
     }

@@ -58,10 +58,38 @@ function AppContent() {
             <Route path="/result" element={<PageTransition><Result /></PageTransition>} />
             <Route path="/practice" element={<PageTransition><Practice /></PageTransition>} />
             <Route path="/learn" element={<PageTransition><Learn /></PageTransition>} />
-            <Route path="/learn/lesson/:lessonId" element={<PageTransition><LessonDetail /></PageTransition>} />
+            <Route
+              path="/learn/lesson/:lessonId"
+              element={
+                <PageTransition>
+                  <ProtectedRoute>
+                    <LessonDetail />
+                  </ProtectedRoute>
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/learn/lesson/:slug"
+              element={
+                <PageTransition>
+                  <ProtectedRoute>
+                    <LessonDetail />
+                  </ProtectedRoute>
+                </PageTransition>
+              }
+            />
             <Route path="/leaderboard" element={<PageTransition><Leaderboard /></PageTransition>} />
             <Route path="/daily-challenge" element={<PageTransition><DailyChallenge /></PageTransition>} />
-            <Route path="/dashboard" element={<Navigate to="/profile" replace />} />
+            <Route
+              path="/dashboard"
+              element={
+                <PageTransition>
+                  <ProtectedRoute>
+                    <Navigate to="/profile" replace />
+                  </ProtectedRoute>
+                </PageTransition>
+              }
+            />
             <Route
               path="/profile"
               element={
@@ -76,7 +104,9 @@ function AppContent() {
               path="/settings"
               element={
                 <PageTransition>
-                  <Settings />
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
                 </PageTransition>
               }
             />

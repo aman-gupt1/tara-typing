@@ -11,6 +11,7 @@ import Keyboard from '../components/typing/Keyboard';
 import CustomTextModal from '../components/typing/CustomTextModal';
 import { useTypingContext } from '../context/TypingContext';
 import { useSettings } from '../context/SettingsContext';
+import { useAuth } from '../context/AuthContext';
 import { typingService } from '../services/typingService';
 import { practiceService } from '../services/practiceService';
 import { challengeService } from '../services/challengeService';
@@ -132,6 +133,7 @@ const ACHIEVEMENT_TITLES = {
 export const TypingTest = () => {
   const { testConfig, setTestConfig, setLastResult } = useTypingContext();
   const { soundEnabled, soundType, soundVolume } = useSettings();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const [duration, setDuration]     = useState(testConfig.duration || 30);
@@ -315,28 +317,32 @@ export const TypingTest = () => {
         console.warn('Practice session save error:', err.message);
       }
 
-      // If this was a daily challenge, submit to challenge API
+      // If this was a daily challenge, submit to challenge API (authenticated typists only)
       if (testConfig?.isDailyChallenge && testConfig?.challengeId) {
-        try {
-          const res = await challengeService.submitChallengeScore({
-            challengeId: testConfig.challengeId,
-            wpm: finalWpm,
-            rawWpm: finalRawWpm,
-            accuracy: finalAccuracy,
-            mistakes: errors,
-            correctCharacters: correct,
-            totalCharacters: completedTyped.length,
-            consistency,
-          });
-          if (res?.rank) {
-            toast.success(`🎯 Daily Challenge completed! Today's Rank: #${res.rank}`);
+        if (isAuthenticated) {
+          try {
+            const res = await challengeService.submitChallengeScore({
+              challengeId: testConfig.challengeId,
+              wpm: finalWpm,
+              rawWpm: finalRawWpm,
+              accuracy: finalAccuracy,
+              mistakes: errors,
+              correctCharacters: correct,
+              totalCharacters: completedTyped.length,
+              consistency,
+            });
+            if (res?.rank) {
+              toast.success(`🎯 Daily Challenge completed! Today's Rank: #${res.rank}`);
+            }
+          } catch (err) {
+            if (err?.status === 409) {
+              toast.info("You have already completed today's challenge.");
+            } else {
+              console.warn('Challenge submit notice:', err.message);
+            }
           }
-        } catch (err) {
-          if (err?.status === 409) {
-            toast.info("You have already completed today's challenge.");
-          } else {
-            console.warn('Challenge submit notice:', err.message);
-          }
+        } else {
+          toast.info("Log in to save your score on the official Daily Challenge leaderboard!");
         }
       }
 
@@ -351,7 +357,7 @@ export const TypingTest = () => {
 
       navigate('/result');
     },
-    [mode, navigate, setLastResult, soundEnabled, testConfig]
+    [mode, navigate, setLastResult, soundEnabled, testConfig, isAuthenticated]
   );
 
   // Countdown timer

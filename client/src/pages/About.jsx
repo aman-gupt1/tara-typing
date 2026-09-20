@@ -177,7 +177,7 @@ function TypingVisual() {
               ))}
             </div>
           ))}
-          <div className="mx-auto mt-1.5 grid h-8 w-3/5 place-items-center rounded-md border border-border bg-card font-display text-[10px] font-semibold tracking-[0.12em] text-muted-foreground shadow-sm sm:h-10 sm:text-xs">SPACE</div>
+          <div className="mx-auto mt-1.5 grid h-8 w-3/5 place-items-center rounded-md border border-border bg-card font-display text-[10px] font-semibold tracking-[0.12em] text-muted-foreground shadow-sm sm:h-10 sm:text-xs">Aman Kumar Gupta</div>
         </div>
       </div>
       <div className="absolute -left-2 top-1/4 rounded-xl border border-border bg-card px-3 py-2 shadow-lg sm:-left-8 transition-transform duration-300 hover:scale-105"><p className="text-[10px] font-medium text-muted-foreground">Speed</p><p className="font-display text-sm font-bold text-primary">120 WPM</p></div>
