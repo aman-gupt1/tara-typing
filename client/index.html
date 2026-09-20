@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tara Typing — Free Online Typing Test</title>
+    
+    <!-- Meta SEO -->
+    <meta name="description" content="Test your typing speed with Tara Typing's free online typing test. Measure WPM and accuracy, practice daily, and climb the global leaderboard." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tara Typing" />
+    <meta property="og:title" content="Tara Typing — Free Online Typing Test" />
+    <meta property="og:description" content="Type Faster. Think Sharper. Free online typing speed test with real-time WPM and accuracy tracking." />
+    <meta property="og:image" content="/favicon.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#0d0f18" />
+
+    <!-- Google Fonts: Inter, Space Grotesk, JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Immediate Accent Color Hydration to prevent flash -->
+    <script>
+      (function() {
+        try {
+          var savedColor = localStorage.getItem('tara_accent_color');
+          if (savedColor) {
+            document.documentElement.style.setProperty('--primary', savedColor);
+            document.documentElement.style.setProperty('--ring', savedColor);
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body class="bg-background text-foreground font-sans antialiased min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

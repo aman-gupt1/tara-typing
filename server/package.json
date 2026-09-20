@@ -1,0 +1,28 @@
+{
+  "name": "tara-typing-server",
+  "version": "1.0.0",
+  "description": "Backend API for Tara Typing platform",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node src/seeds/admin.seed.js"
+  },
+  "dependencies": {
+    "argon2": "^0.45.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "morgan": "^1.10.0",
+    "tara-typing": "file:..",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
