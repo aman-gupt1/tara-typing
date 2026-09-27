@@ -54,19 +54,19 @@ function SkeletonBox({ className = '' }) {
 
 function PodiumSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
+    <div className="grid grid-cols-3 gap-2 sm:gap-3.5 items-end pt-3 sm:pt-4">
       {[2, 1, 3].map((rank) => (
         <div
           key={rank}
-          className={`ldb-card rounded-2xl border border-border bg-card px-3.5 py-4 text-center ${rank === 1 ? 'sm:order-1' : rank === 2 ? 'sm:order-0' : 'sm:order-2'}`}
+          className={`ldb-card rounded-2xl border border-border bg-card px-2 py-3 sm:px-3.5 sm:py-4 text-center ${rank === 1 ? '-translate-y-1.5 sm:-translate-y-2' : ''}`}
         >
-          <SkeletonBox className="mx-auto mb-1.5 h-4 w-4" />
-          <SkeletonBox className="mx-auto h-11 w-11 rounded-full" />
-          <SkeletonBox className="mx-auto mt-2 h-3.5 w-20" />
-          <SkeletonBox className="mx-auto mt-1 h-2.5 w-14" />
-          <div className="mt-2.5 grid grid-cols-3 gap-2">
+          <SkeletonBox className="mx-auto mb-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <SkeletonBox className="mx-auto h-9 w-9 sm:h-12 sm:w-12 rounded-full" />
+          <SkeletonBox className="mx-auto mt-2 h-3 w-14 sm:w-20" />
+          <SkeletonBox className="mx-auto mt-1 h-2.5 w-10 sm:w-14" />
+          <div className="mt-2 sm:mt-2.5 grid grid-cols-3 gap-1 sm:gap-2">
             {[0, 1, 2].map((i) => (
-              <SkeletonBox key={i} className="h-6" />
+              <SkeletonBox key={i} className="h-5 sm:h-6" />
             ))}
           </div>
         </div>
@@ -79,17 +79,20 @@ function TableSkeleton({ rows = 8 }) {
   return (
     <div className="divide-y divide-border/50">
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 px-4 py-3">
-          <SkeletonBox className="h-5 w-8 shrink-0" />
-          <SkeletonBox className="h-8 w-8 shrink-0 rounded-full" />
-          <div className="flex-1 space-y-1.5">
-            <SkeletonBox className="h-3.5 w-28" />
-            <SkeletonBox className="h-3 w-20" />
+        <div key={i} className="flex items-center justify-between gap-3 px-3 py-2.5 sm:px-4 sm:py-3">
+          <div className="flex items-center gap-2.5 sm:gap-4 flex-1">
+            <SkeletonBox className="h-5 w-6 sm:w-8 shrink-0" />
+            <SkeletonBox className="h-8 w-8 shrink-0 rounded-full" />
+            <div className="flex-1 space-y-1 sm:space-y-1.5">
+              <SkeletonBox className="h-3.5 w-24 sm:w-28" />
+              <SkeletonBox className="h-2.5 w-16 sm:w-20" />
+            </div>
           </div>
-          <SkeletonBox className="h-4 w-12 shrink-0" />
-          <SkeletonBox className="h-4 w-14 shrink-0" />
-          <SkeletonBox className="h-4 w-10 shrink-0" />
-          <SkeletonBox className="h-4 w-16 shrink-0" />
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+            <SkeletonBox className="h-4 w-12 sm:w-14" />
+            <SkeletonBox className="h-4 w-10 hidden sm:block" />
+            <SkeletonBox className="h-4 w-16 hidden md:block" />
+          </div>
         </div>
       ))}
     </div>
@@ -216,37 +219,42 @@ function PodiumCard({ entry, position = 1 }) {
   if (!entry) {
     return (
       <article
-        className={`ldb-card group relative flex flex-col items-center rounded-2xl border border-dashed border-border/60 bg-[#0B1120]/60 ${cfg.elevation} px-3 pt-3.5 pb-2.5 sm:px-3.5 sm:pt-4 sm:pb-3 text-center transition-all duration-300 cursor-default select-none overflow-visible`}
+        className={`ldb-card group relative flex flex-col items-center rounded-2xl border border-dashed border-border/60 bg-[#0B1120]/60 ${cfg.elevation} px-1.5 py-3 sm:px-3.5 sm:pt-4 sm:pb-3 text-center transition-all duration-300 cursor-default select-none overflow-visible w-full`}
       >
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 opacity-40">
+        <div className="absolute -top-3 sm:-top-3.5 left-1/2 -translate-x-1/2 z-20 opacity-40 scale-85 sm:scale-100">
           <CrownBadge rank={position} />
         </div>
-        <div className="relative z-10 my-0.5 flex items-center justify-center w-24 h-14 sm:w-28 sm:h-16 mx-auto opacity-30">
-          <LaurelWreath color={cfg.crownColor} />
-          <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-full border border-dashed border-border/80 grid place-items-center text-xs font-bold text-muted-foreground">
+        <div className="relative z-10 my-0.5 flex items-center justify-center w-20 h-12 sm:w-28 sm:h-16 mx-auto opacity-30">
+          <div className="scale-75 sm:scale-100 origin-center">
+            <LaurelWreath color={cfg.crownColor} />
+          </div>
+          <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-full border border-dashed border-border/80 grid place-items-center text-xs font-bold text-muted-foreground">
             #{position}
           </div>
         </div>
-        <div className="relative z-10 mt-1 min-w-0">
-          <h3 className="font-display text-xs sm:text-sm font-semibold text-muted-foreground truncate leading-tight">
+        <div className="relative z-10 mt-1 min-w-0 w-full px-1">
+          <h3 className="font-display text-[11px] sm:text-sm font-semibold text-muted-foreground truncate leading-tight">
             Spot Available
           </h3>
-          <p className="text-[11px] text-muted-foreground/60 truncate mt-0.5 leading-none">
+          <p className="text-[9px] sm:text-[11px] text-muted-foreground/60 truncate mt-0.5 leading-none">
             Take test to rank
           </p>
         </div>
-        <div className="relative z-10 mt-2 sm:mt-2.5 grid w-full grid-cols-3 items-center text-center pt-1.5 border-t border-white/[0.04] opacity-40">
-          <div className="px-1">
-            <div className="font-display text-base font-bold text-muted-foreground leading-tight">—</div>
-            <div className="mt-0.5 text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase leading-none">WPM</div>
+        <div className="relative z-10 mt-1.5 sm:mt-2.5 grid w-full grid-cols-3 items-center text-center pt-1 sm:pt-1.5 border-t border-white/[0.04] opacity-40">
+          <div className="px-0.5 sm:px-1">
+            <div className="font-display text-xs sm:text-base font-bold text-muted-foreground leading-tight">—</div>
+            <div className="mt-0.5 text-[8px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-none">WPM</div>
           </div>
-          <div className="relative px-1">
-            <div className="font-display text-base font-bold text-muted-foreground">—</div>
-            <div className="mt-0.5 text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase leading-none">Accuracy</div>
+          <div className="relative px-0.5 sm:px-1">
+            <div className="font-display text-xs sm:text-base font-bold text-muted-foreground leading-tight">—</div>
+            <div className="mt-0.5 text-[8px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-none truncate">
+              <span className="hidden sm:inline">Accuracy</span>
+              <span className="sm:hidden">Acc</span>
+            </div>
           </div>
-          <div className="px-1">
-            <div className="font-display text-base font-bold text-muted-foreground">—</div>
-            <div className="mt-0.5 text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase leading-none">Tests</div>
+          <div className="px-0.5 sm:px-1">
+            <div className="font-display text-xs sm:text-base font-bold text-muted-foreground leading-tight">—</div>
+            <div className="mt-0.5 text-[8px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-none">Tests</div>
           </div>
         </div>
       </article>
@@ -264,68 +272,72 @@ function PodiumCard({ entry, position = 1 }) {
 
   return (
     <article
-      className={`ldb-card group relative flex flex-col items-center rounded-2xl border ${cfg.borderColor} bg-[#0B1120] ${cfg.glow} ${cfg.elevation} px-3 pt-3.5 pb-2.5 sm:px-3.5 sm:pt-4 sm:pb-3 text-center transition-all duration-300 cursor-default select-none overflow-visible`}
+      className={`ldb-card group relative flex flex-col items-center rounded-2xl border ${cfg.borderColor} bg-[#0B1120] ${cfg.glow} ${cfg.elevation} px-1.5 py-3 sm:px-3.5 sm:pt-4 sm:pb-3 text-center transition-all duration-300 cursor-default select-none overflow-visible w-full`}
     >
       {/* Ambient top light beam */}
-      <div className={`pointer-events-none absolute inset-x-0 top-0 h-16 rounded-t-2xl ${cfg.topGlow}`} />
+      <div className={`pointer-events-none absolute inset-x-0 top-0 h-14 sm:h-16 rounded-t-2xl ${cfg.topGlow}`} />
 
       {/* Floating Crown Badge centered on top border */}
-      <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20">
+      <div className="absolute -top-3 sm:-top-3.5 left-1/2 -translate-x-1/2 z-20 scale-85 sm:scale-100">
         <CrownBadge rank={position} />
       </div>
 
       {/* Laurel Wreath & Avatar */}
-      <div className="relative z-10 my-0.5 flex items-center justify-center w-24 h-14 sm:w-28 sm:h-16 mx-auto">
-        <LaurelWreath color={cfg.crownColor} />
+      <div className="relative z-10 my-0.5 flex items-center justify-center w-20 h-12 sm:w-28 sm:h-16 mx-auto">
+        <div className="scale-75 sm:scale-100 origin-center">
+          <LaurelWreath color={cfg.crownColor} />
+        </div>
         <UserAvatar
           src={safeEntry.avatar}
           name={safeEntry.name}
           username={safeEntry.username}
-          className={`h-11 w-11 sm:h-12 sm:w-12 rounded-full relative z-10 ${cfg.avatarRing}`}
-          textClassName="text-xs font-bold"
+          className={`h-9 w-9 sm:h-12 sm:w-12 rounded-full relative z-10 ${cfg.avatarRing}`}
+          textClassName="text-[11px] sm:text-xs font-bold"
+          firstLetterOnly
         />
       </div>
 
       {/* Username / Name */}
-      <div className="relative z-10 mt-1 min-w-0">
-        <h3 className="font-display text-xs sm:text-sm font-bold text-foreground truncate max-w-[130px] sm:max-w-[150px] leading-tight">
+      <div className="relative z-10 mt-1 min-w-0 w-full px-1">
+        <h3 className="font-display text-[11px] sm:text-sm font-bold text-foreground truncate max-w-full leading-tight">
           {safeEntry.name}
         </h3>
-        <p className="text-[11px] text-muted-foreground truncate max-w-[120px] sm:max-w-[140px] mt-0.5 leading-none">
+        <p className="text-[9px] sm:text-[11px] text-muted-foreground truncate max-w-full mt-0.5 leading-none">
           @{safeEntry.username}
         </p>
       </div>
 
       {/* 3 Stats Row with Vertical Dividers */}
-      <div className="relative z-10 mt-2 sm:mt-2.5 grid w-full grid-cols-3 items-center text-center pt-1.5 border-t border-white/[0.04]">
+      <div className="relative z-10 mt-1.5 sm:mt-2.5 grid w-full grid-cols-3 items-center text-center pt-1 sm:pt-1.5 border-t border-white/[0.04]">
         {/* WPM */}
-        <div className="px-1">
-          <div className={`font-display text-base sm:text-lg font-bold ${cfg.wpmColor} leading-tight`}>
+        <div className="px-0.5 sm:px-1">
+          <div className={`font-display text-xs sm:text-lg font-bold ${cfg.wpmColor} leading-tight`}>
             {safeEntry.wpm}
           </div>
-          <div className="mt-0.5 text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase leading-none">
+          <div className="mt-0.5 text-[8px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-none">
             WPM
           </div>
         </div>
 
         {/* Accuracy with side dividers */}
-        <div className="relative px-1">
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border/50" />
-          <div className="font-display text-base sm:text-lg font-bold text-foreground leading-tight">
+        <div className="relative px-0.5 sm:px-1">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-3.5 sm:h-5 w-px bg-border/40" />
+          <div className="font-display text-xs sm:text-lg font-bold text-foreground leading-tight">
             {safeEntry.accuracy}%
           </div>
-          <div className="mt-0.5 text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase leading-none">
-            Accuracy
+          <div className="mt-0.5 text-[8px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-none truncate">
+            <span className="hidden sm:inline">Accuracy</span>
+            <span className="sm:hidden">Acc</span>
           </div>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 h-5 w-px bg-border/50" />
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3.5 sm:h-5 w-px bg-border/40" />
         </div>
 
         {/* Tests */}
-        <div className="px-1">
-          <div className="font-display text-base sm:text-lg font-bold text-foreground leading-tight">
+        <div className="px-0.5 sm:px-1">
+          <div className="font-display text-xs sm:text-lg font-bold text-foreground leading-tight">
             {safeEntry.tests}
           </div>
-          <div className="mt-0.5 text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase leading-none">
+          <div className="mt-0.5 text-[8px] sm:text-[10px] font-medium text-muted-foreground uppercase leading-none">
             Tests
           </div>
         </div>
@@ -437,6 +449,19 @@ export const Leaderboard = () => {
 
   const totalPages = Math.ceil(sortedRows.length / pageSize) || 1;
   const paginatedRows = sortedRows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const getPaginationRange = () => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 3) {
+      return [1, 2, 3, '...', totalPages];
+    }
+    if (currentPage >= totalPages - 2) {
+      return [1, '...', totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, '...', currentPage, '...', totalPages];
+  };
 
   // Top 3 entries from the real API response
   const displayTop3 = [
@@ -565,19 +590,19 @@ export const Leaderboard = () => {
         </div>
 
         {/* ── FILTER BAR ── */}
-        <div className="mt-7 card-glass rounded-2xl p-3 sm:p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            {/* Period + Duration filters */}
-            <div className="flex flex-wrap items-center gap-2.5">
+        <div className="mt-5 sm:mt-7 card-glass rounded-2xl p-2.5 sm:p-4">
+          <div className="flex flex-col gap-2.5 sm:gap-3 md:flex-row md:items-center md:justify-between">
+            {/* Period + Duration filters with smooth scrollable overflow on mobile */}
+            <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar pb-0.5 md:pb-0">
               {/* Period */}
-              <div className="flex rounded-xl border border-border dark:border-[#1E293B] bg-slate-100 dark:bg-[#0B1120] p-1" role="tablist" aria-label="Time period">
+              <div className="flex shrink-0 rounded-xl border border-border dark:border-[#1E293B] bg-slate-100 dark:bg-[#0B1120] p-1" role="tablist" aria-label="Time period">
                 {periods.map((p) => (
                   <button
                     key={p.id}
                     role="tab"
                     aria-selected={period === p.id}
                     onClick={() => setPeriod(p.id)}
-                    className={`ldb-filter-btn rounded-lg px-3.5 py-1.5 text-sm font-medium transition-all select-none ${
+                    className={`ldb-filter-btn rounded-lg px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-all select-none whitespace-nowrap ${
                       period === p.id
                         ? 'bg-primary text-white font-semibold shadow-sm shadow-primary/30'
                         : 'text-muted-foreground hover:text-foreground'
@@ -589,13 +614,13 @@ export const Leaderboard = () => {
               </div>
 
               {/* Duration */}
-              <div className="flex rounded-xl border border-border dark:border-[#1E293B] bg-slate-100 dark:bg-[#0B1120] p-1" role="group" aria-label="Duration">
+              <div className="flex shrink-0 rounded-xl border border-border dark:border-[#1E293B] bg-slate-100 dark:bg-[#0B1120] p-1" role="group" aria-label="Duration">
                 {durationOptions.map((d) => (
                   <button
                     key={d.id}
                     aria-pressed={duration === d.id}
                     onClick={() => setDuration(d.id)}
-                    className={`ldb-filter-btn rounded-lg px-3 py-1.5 text-sm font-medium transition-all select-none ${
+                    className={`ldb-filter-btn rounded-lg px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-all select-none whitespace-nowrap ${
                       duration === d.id
                         ? 'bg-primary text-white font-semibold shadow-sm shadow-primary/30'
                         : 'text-muted-foreground hover:text-foreground'
@@ -608,14 +633,14 @@ export const Leaderboard = () => {
             </div>
 
             {/* Search */}
-            <div className="relative w-full sm:w-64">
+            <div className="relative w-full md:w-60 lg:w-64">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search users..."
+                placeholder="Search users or location..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border border-border dark:border-[#1E293B] bg-slate-100 dark:bg-[#0B1120] py-2 pl-9 pr-8 text-sm text-slate-900 dark:text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary/70 focus:ring-1 focus:ring-primary/30 transition-colors caret-primary"
+                className="w-full rounded-xl border border-border dark:border-[#1E293B] bg-slate-100 dark:bg-[#0B1120] py-1.5 sm:py-2 pl-9 pr-8 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary/70 focus:ring-1 focus:ring-primary/30 transition-colors caret-primary"
                 aria-label="Search leaderboard users"
               />
               {search && (
@@ -633,32 +658,32 @@ export const Leaderboard = () => {
         </div>
 
         {/* ── MAIN CONTENT: LEFT (PODIUM + TABLE) & RIGHT (SIDEBAR) ── */}
-        <div className="mt-6 grid gap-5 lg:grid-cols-12 items-stretch">
+        <div className="mt-5 sm:mt-6 grid gap-5 lg:grid-cols-12 items-stretch">
 
           {/* LEFT COLUMN: PODIUM CARDS + TABLE */}
           <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-4 sm:gap-5">
 
-            {/* ── TOP 3 PODIUM (Width equals the table below it) ── */}
+            {/* ── TOP 3 PODIUM (3 columns across all breakpoints) ── */}
             {loading ? (
               <PodiumSkeleton />
             ) : rows.length > 0 ? (
-              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3 items-end pt-2" aria-label="Top 3 typists">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3.5 items-end pt-2 sm:pt-4" aria-label="Top 3 typists">
                 {/* 2nd place (left) */}
-                <div className="order-2 sm:order-1">
+                <div className="order-1">
                   <PodiumCard entry={displayTop3[1]} position={2} />
                 </div>
                 {/* 1st place (center) */}
-                <div className="order-1 sm:order-2">
+                <div className="order-2">
                   <PodiumCard entry={displayTop3[0]} position={1} />
                 </div>
                 {/* 3rd place (right) */}
-                <div className="order-3 sm:order-3">
+                <div className="order-3">
                   <PodiumCard entry={displayTop3[2]} position={3} />
                 </div>
               </div>
             ) : null}
 
-            {/* TABLE CARD */}
+            {/* TABLE / CARD LIST CONTAINER */}
             <div className="card-glass rounded-2xl overflow-hidden shadow-sm flex-1 flex flex-col justify-between">
             {loading ? (
               <>
@@ -678,7 +703,7 @@ export const Leaderboard = () => {
                 </div>
                 <button
                   onClick={fetchBoard}
-                  className="mt-1 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                  className="mt-1 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 cursor-pointer"
                 >
                   Try Again
                 </button>
@@ -698,7 +723,7 @@ export const Leaderboard = () => {
                   <button
                     type="button"
                     onClick={() => setSearch('')}
-                    className="mt-1 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                    className="mt-1 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 cursor-pointer"
                   >
                     Clear Search
                   </button>
@@ -710,16 +735,77 @@ export const Leaderboard = () => {
               </div>
             ) : (
               <>
-                {/* Table header row */}
-                <div className="overflow-x-auto flex-1">
-                  <table className="w-full min-w-[620px] text-sm table-fixed" role="table">
+                {/* ── MOBILE CARD LIST (< md) — Zero horizontal scrolling ── */}
+                <div className="block md:hidden divide-y divide-border/40 flex-1">
+                  {paginatedRows.map((row) => (
+                    <div
+                      key={`m-${period}-${duration}-${row.rank}-${row.username}`}
+                      className={`p-3 transition-colors flex items-center justify-between gap-2.5 ${
+                        row.isCurrentUser || row.isYou
+                          ? 'bg-primary/10 border-l-2 border-l-primary'
+                          : 'hover:bg-accent/30'
+                      }`}
+                    >
+                      {/* Rank & Typist Info */}
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <span className="inline-flex items-center justify-center h-6 w-6 shrink-0">
+                          <TableRankBadge rank={row.rank} />
+                        </span>
+                        <UserAvatar
+                          src={row.avatar}
+                          name={row.name}
+                          username={row.username}
+                          className="h-8 w-8 shrink-0 rounded-full"
+                          textClassName="text-xs font-semibold"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className={`font-semibold text-xs truncate leading-tight ${row.isCurrentUser || row.isYou ? 'text-primary' : 'text-foreground'}`}>
+                            {row.name || row.username}
+                            {(row.isCurrentUser || row.isYou) && (
+                              <span className="ml-1 inline-flex items-center rounded bg-primary/20 px-1 py-0.2 text-[9px] font-bold text-primary">
+                                YOU
+                              </span>
+                            )}
+                          </p>
+                          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5 truncate">
+                            <span className="truncate">@{row.username || 'user'}</span>
+                            {row.location && (
+                              <span className="truncate shrink-0 flex items-center gap-0.5">
+                                • 🌐 {row.location}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Stats: WPM & Accuracy */}
+                      <div className="text-right shrink-0 flex flex-col items-end">
+                        <div className="flex items-baseline gap-1">
+                          <span className="font-display text-sm font-bold text-primary">{row.wpm}</span>
+                          <span className="text-[10px] text-muted-foreground font-semibold">WPM</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5">
+                          <span className={`font-semibold ${(row.accuracy ?? 0) >= 95 ? 'text-emerald-400' : 'text-muted-foreground'}`}>
+                            {row.accuracy}% acc
+                          </span>
+                          <span>•</span>
+                          <span>{row.tests ?? 1} {row.tests === 1 ? 'test' : 'tests'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* ── DESKTOP TABLE (>= md) ── */}
+                <div className="hidden md:block overflow-x-auto flex-1">
+                  <table className="w-full text-sm table-fixed" role="table">
                     <thead className="bg-[#0D1527] dark:bg-[#070D1B] border-b border-border/80 sticky top-0 z-10 backdrop-blur-sm">
                       <tr className="text-left select-none">
                         <th className="w-12 px-3 py-2.5 sm:py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center">#</th>
-                        <th className="w-[27%] px-3.5 py-2.5 sm:py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">User</th>
+                        <th className="w-[30%] px-3.5 py-2.5 sm:py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">User</th>
                         <th
                           onClick={() => handleSort('wpm')}
-                          className="w-[13%] px-3 py-2.5 sm:py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
+                          className="w-[12%] px-3 py-2.5 sm:py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
                         >
                           <span className="flex items-center gap-1">
                             WPM
@@ -744,8 +830,8 @@ export const Leaderboard = () => {
                             <TrendingUp size={11} className={sortField === 'tests' ? 'text-primary' : 'opacity-60'} />
                           </span>
                         </th>
-                        <th className="w-[19%] px-3.5 py-2.5 sm:py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Location</th>
-                        <th className="w-[16%] px-3.5 py-2.5 sm:py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Last Active</th>
+                        <th className="w-[18%] px-3.5 py-2.5 sm:py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Location</th>
+                        <th className="w-[15%] px-3.5 py-2.5 sm:py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Last Active</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/40">
@@ -805,7 +891,7 @@ export const Leaderboard = () => {
                           <td className="px-3 py-2.5 text-xs sm:text-sm text-muted-foreground">{row.tests ?? 1}</td>
 
                           {/* Country */}
-                          <td className="px-3.5 py-2.5 hidden md:table-cell">
+                          <td className="px-3.5 py-2.5">
                             <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground truncate max-w-full">
                               <span className="text-xs leading-none shrink-0" role="img" aria-label={row.location || 'Global'}>
                                 🌐
@@ -815,7 +901,7 @@ export const Leaderboard = () => {
                           </td>
 
                           {/* Last Active */}
-                          <td className="px-3.5 py-2.5 text-xs text-muted-foreground hidden md:table-cell truncate">
+                          <td className="px-3.5 py-2.5 text-xs text-muted-foreground truncate">
                             {row.date || formatRelativeTime(row.rawDate)}
                           </td>
                         </tr>
@@ -824,12 +910,37 @@ export const Leaderboard = () => {
                   </table>
                 </div>
 
-                {/* Pagination pinned flush to bottom */}
-                <div className="mt-auto flex flex-col sm:flex-row items-center justify-between gap-2.5 border-t border-border/70 px-4 py-2.5 sm:py-3 select-none bg-background/40">
-                  <p className="text-xs text-muted-foreground">
-                    Showing top {Math.min(paginatedRows.length, pageSize)} of {filteredRows.length} typists
+                {/* ── RESPONSIVE PAGINATION ── */}
+                <div className="mt-auto flex items-center justify-between gap-2.5 border-t border-border/70 px-3.5 sm:px-4 py-2.5 sm:py-3 select-none bg-background/40">
+                  <p className="text-xs text-muted-foreground truncate">
+                    Showing {Math.min(paginatedRows.length, pageSize)} of {filteredRows.length} <span className="hidden sm:inline">typists</span>
                   </p>
-                  <div className="flex items-center gap-1">
+
+                  {/* Compact Mobile Pagination */}
+                  <div className="flex sm:hidden items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="grid h-7 w-7 place-items-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 disabled:opacity-40 disabled:hover:border-border transition-colors cursor-pointer disabled:cursor-not-allowed"
+                      aria-label="Previous page"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+                    <span className="text-xs font-semibold text-foreground px-1">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="grid h-7 w-7 place-items-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 disabled:opacity-40 disabled:hover:border-border transition-colors cursor-pointer disabled:cursor-not-allowed"
+                      aria-label="Next page"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+
+                  {/* Desktop / Tablet Numbered Pagination */}
+                  <div className="hidden sm:flex items-center gap-1">
                     <button
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
@@ -839,29 +950,25 @@ export const Leaderboard = () => {
                       <ChevronLeft size={14} />
                     </button>
 
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                      <button
-                        key={p}
-                        onClick={() => setCurrentPage(p)}
-                        className={`grid h-7 w-7 place-items-center rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                          currentPage === p
-                            ? 'bg-primary text-white shadow-sm shadow-primary/30'
-                            : 'border border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
-                        }`}
-                      >
-                        {p}
-                      </button>
+                    {getPaginationRange().map((p, idx) => (
+                      p === '...' ? (
+                        <span key={`ellipsis-${idx}`} className="px-1 text-xs text-muted-foreground select-none">
+                          ...
+                        </span>
+                      ) : (
+                        <button
+                          key={p}
+                          onClick={() => setCurrentPage(p)}
+                          className={`grid h-7 w-7 place-items-center rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                            currentPage === p
+                              ? 'bg-primary text-white shadow-sm shadow-primary/30'
+                              : 'border border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      )
                     ))}
-
-                    {totalPages > 5 && <span className="px-1 text-xs text-muted-foreground">...</span>}
-                    {totalPages > 5 && (
-                      <button
-                        onClick={() => setCurrentPage(totalPages)}
-                        className="grid h-7 w-7 place-items-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors cursor-pointer"
-                      >
-                        {totalPages}
-                      </button>
-                    )}
 
                     <button
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
@@ -994,56 +1101,56 @@ export const Leaderboard = () => {
               <h2 className="font-display text-sm sm:text-base font-bold text-foreground group-hover:text-emerald-300 transition-colors mb-3">
                 Leaderboard Stats
               </h2>
-              <div className="space-y-2.5">
+              <div className="grid grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-1 lg:gap-2.5">
                 {/* Total Typists */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 lg:p-0 rounded-xl bg-slate-900/30 lg:bg-transparent">
                   <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-blue-500/10 text-primary">
                     <Users size={16} />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
+                    <p className="font-display text-xs sm:text-base font-bold text-foreground leading-tight truncate">
                       {totalTypistsCount.toLocaleString()}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">Total Typists</p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">Total Typists</p>
                   </div>
                 </div>
 
                 {/* Countries / Locations */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 lg:p-0 rounded-xl bg-slate-900/30 lg:bg-transparent">
                   <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-cyan-500/10 text-cyan-400">
                     <Globe2 size={16} />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
+                    <p className="font-display text-xs sm:text-base font-bold text-foreground leading-tight truncate">
                       {uniqueLocationsCount}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">Locations</p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">Locations</p>
                   </div>
                 </div>
 
                 {/* Tests Completed */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 lg:p-0 rounded-xl bg-slate-900/30 lg:bg-transparent">
                   <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-purple-500/10 text-purple-400">
                     <BarChart2 size={16} />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
+                    <p className="font-display text-xs sm:text-base font-bold text-foreground leading-tight truncate">
                       {totalTestsCount.toLocaleString()}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">Tests Completed</p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">Tests Completed</p>
                   </div>
                 </div>
 
                 {/* Highest Score */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 lg:p-0 rounded-xl bg-slate-900/30 lg:bg-transparent">
                   <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-amber-500/10 text-amber-400">
                     <Star size={16} />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
+                    <p className="font-display text-xs sm:text-base font-bold text-foreground leading-tight truncate">
                       {highestScore > 0 ? `${highestScore} WPM` : '0 WPM'}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">Highest Score</p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">Highest Score</p>
                   </div>
                 </div>
               </div>
