@@ -1,5 +1,4 @@
 import { api } from './api';
-import { TYPING_LESSONS, LESSON_CATEGORIES } from '../data/typingLessons';
 
 const COMPLETED_LESSONS_KEY = 'tara_completed_lessons';
 const BOOKMARKED_LESSONS_KEY = 'tara_bookmarked_lessons';
@@ -8,38 +7,25 @@ const LAST_LESSON_KEY = 'tara_last_lesson';
 
 export const learningService = {
   /**
-   * Get all lessons with user progress from backend
+   * Get all active lessons from backend
    * GET /api/lessons
    */
   getLessons: async (category = 'all') => {
-    try {
-      const res = await api.get('/lessons');
-      const list = Array.isArray(res) ? res : (res?.lessons || []);
-      if (category && category !== 'all') {
-        return list.filter((l) => l.category === category || l.categoryId === category);
-      }
-      return list;
-    } catch (err) {
-      console.warn('Learning API getLessons warning:', err.message);
-      if (!category || category === 'all') {
-        return TYPING_LESSONS;
-      }
-      return TYPING_LESSONS.filter((l) => l.category === category || l.categoryId === category);
+    const res = await api.get('/lessons');
+    const list = Array.isArray(res) ? res : (res?.lessons || []);
+    if (category && category !== 'all') {
+      return list.filter((l) => l.category === category || l.categoryId === category);
     }
+    return list;
   },
 
   /**
-   * Get single lesson by slug
+   * Get single lesson by slug from backend
    * GET /api/lessons/:slug
    */
   getLessonBySlug: async (slug) => {
-    try {
-      const res = await api.get(`/lessons/${slug}`);
-      return res?.lesson || null;
-    } catch (err) {
-      console.warn(`Learning API getLessonBySlug warning (${slug}):`, err.message);
-      return TYPING_LESSONS.find((l) => l.id === slug || l.slug === slug) || null;
-    }
+    const res = await api.get(`/lessons/${slug}`);
+    return res?.lesson || null;
   },
 
   /**
@@ -50,39 +36,24 @@ export const learningService = {
   },
 
   /**
-   * Get lesson categories
-   */
-  getCategories: async () => {
-    return LESSON_CATEGORIES;
-  },
-
-  /**
    * Get logged-in user's full learning progress from backend
-   * GET /api/lessons/progress (protected)
+   * GET /api/lessons/progress (authenticated)
    */
   getProgress: async () => {
     try {
       const res = await api.get('/lessons/progress');
       if (res?.progress) {
-        const p = res.progress;
-        return {
-          completedLessons: p.completedLessons || [],
-          bookmarkedLessons: p.bookmarkedLessons || [],
-          quizScores: p.quizScores || {},
-          lastVisitedLesson: p.lastVisitedLesson || '',
-          totalCompleted: p.totalCompleted || (p.completedLessons || []).length,
-          updatedAt: p.updatedAt,
-        };
+        return res.progress;
       }
-    } catch (err) {
-      // Fallback for unauthenticated guest
+    } catch {
+      // Unauthenticated or network error fallback
     }
 
     // Guest fallback using localStorage
     let completed = [];
     let bookmarked = [];
     let quizScores = {};
-    let lastVisitedLesson = 'what-is-touch-typing';
+    let lastVisitedLesson = '';
 
     try {
       const c = localStorage.getItem(COMPLETED_LESSONS_KEY);
@@ -95,23 +66,18 @@ export const learningService = {
       if (l) lastVisitedLesson = l;
     } catch {}
 
-    const total = TYPING_LESSONS.length;
-    const progressPercent = total > 0 ? Math.round((completed.length / total) * 100) : 0;
-
     return {
       completedLessons: completed,
       bookmarkedLessons: bookmarked,
       quizScores,
       lastVisitedLesson,
-      totalLessons: total,
-      completedCount: completed.length,
-      progressPercentage: progressPercent,
+      totalCompleted: completed.length,
     };
   },
 
   /**
    * Mark lesson as completed with optional quiz score
-   * POST /api/lessons/:slug/complete (protected)
+   * POST /api/lessons/:slug/complete (authenticated)
    */
   completeLesson: async (slug, data = {}) => {
     const payload = {};
@@ -123,7 +89,7 @@ export const learningService = {
       const res = await api.post(`/lessons/${slug}/complete`, payload);
       return res;
     } catch (err) {
-      // Fallback for unauthenticated guest
+      // Guest local fallback
       try {
         let completed = [];
         const c = localStorage.getItem(COMPLETED_LESSONS_KEY);
@@ -155,14 +121,14 @@ export const learningService = {
 
   /**
    * Toggle lesson bookmark
-   * PATCH /api/lessons/:slug/bookmark (protected)
+   * PATCH /api/lessons/:slug/bookmark (authenticated)
    */
   toggleBookmark: async (slug) => {
     try {
       const res = await api.patch(`/lessons/${slug}/bookmark`);
       return res;
-    } catch (err) {
-      // Fallback for guest
+    } catch {
+      // Guest local fallback
       try {
         let bookmarked = [];
         const b = localStorage.getItem(BOOKMARKED_LESSONS_KEY);
@@ -183,13 +149,13 @@ export const learningService = {
 
   /**
    * Update last visited lesson
-   * PATCH /api/lessons/:slug/last-visited (protected)
+   * PATCH /api/lessons/:slug/last-visited (authenticated)
    */
   updateLastVisited: async (slug) => {
     try {
       const res = await api.patch(`/lessons/${slug}/last-visited`);
       return res;
-    } catch (err) {
+    } catch {
       try {
         localStorage.setItem(LAST_LESSON_KEY, slug);
       } catch {}
@@ -199,13 +165,13 @@ export const learningService = {
 
   /**
    * Reset user's learning progress
-   * DELETE /api/lessons/progress (protected)
+   * DELETE /api/lessons/progress (authenticated)
    */
   resetProgress: async () => {
     try {
       const res = await api.delete('/lessons/progress');
       return res;
-    } catch (err) {
+    } catch {
       try {
         localStorage.removeItem(COMPLETED_LESSONS_KEY);
         localStorage.removeItem(BOOKMARKED_LESSONS_KEY);

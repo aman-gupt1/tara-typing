@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import {
-  BookOpen,
   Clock,
   CheckCircle2,
   Bookmark,
   BookmarkCheck,
   AlertCircle,
-  HelpCircle,
   Lightbulb,
   Sparkles,
   ArrowLeft,
@@ -16,8 +14,8 @@ import {
 import { toast } from 'react-toastify';
 import confetti from 'canvas-confetti';
 import SEO from '../components/common/SEO';
-import { TYPING_LESSONS } from '../data/typingLessons';
-import { useLearn } from '../context/LearnContext';
+import { useLearn, mapBackendLesson } from '../context/LearnContext';
+import { learningService } from '../services/learningService';
 import InteractiveKeyboard from '../components/learn/InteractiveKeyboard';
 import FingerGuide from '../components/learn/FingerGuide';
 import PostureGuide from '../components/learn/PostureGuide';
@@ -27,12 +25,54 @@ import QuizCard from '../components/learn/QuizCard';
 import LessonSidebar from '../components/learn/LessonSidebar';
 import LessonNavigation from '../components/learn/LessonNavigation';
 
+function LessonDetailSkeleton() {
+  return (
+    <div className="w-full flex-1 bg-background text-foreground animate-pulse">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex justify-between items-center">
+          <div className="h-4 w-32 bg-muted/60 rounded-md" />
+          <div className="h-4 w-28 bg-muted/60 rounded-md" />
+        </div>
+        <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+          <div className="space-y-6">
+            <div className="card-glass rounded-3xl p-6 sm:p-8 space-y-4 border border-border/60">
+              <div className="flex gap-2">
+                <div className="h-5 w-24 bg-muted/60 rounded-md" />
+                <div className="h-5 w-28 bg-muted/40 rounded-md" />
+              </div>
+              <div className="h-8 w-3/4 bg-muted/60 rounded-lg" />
+              <div className="h-4 w-full bg-muted/40 rounded-md" />
+            </div>
+            <div className="card-glass rounded-2xl p-6 sm:p-8 space-y-4 border border-border/60">
+              <div className="h-6 w-1/2 bg-muted/60 rounded-md" />
+              <div className="h-4 w-full bg-muted/40 rounded-md" />
+              <div className="h-4 w-5/6 bg-muted/40 rounded-md" />
+            </div>
+          </div>
+          <div className="hidden lg:block">
+            <div className="card-glass rounded-2xl p-5 space-y-4 border border-border/60">
+              <div className="h-5 w-32 bg-muted/60 rounded-md" />
+              <div className="h-2 w-full bg-muted/40 rounded-full" />
+              <div className="space-y-2 pt-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-8 w-full bg-muted/30 rounded-xl" />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export const LessonDetail = () => {
   const { lessonId, slug } = useParams();
   const currentLessonId = slug || lessonId;
-  const navigate = useNavigate();
+
   const {
     lessons: contextLessons,
+    totalLessons,
     markLessonCompleted,
     isCompleted,
     isBookmarked,
@@ -40,32 +80,89 @@ export const LessonDetail = () => {
     setLastVisitedLesson,
   } = useLearn();
 
-  const lessons = contextLessons && contextLessons.length > 0 ? contextLessons : TYPING_LESSONS;
-
+  const [lessonData, setLessonData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showCompletionBanner, setShowCompletionBanner] = useState(false);
 
-  const lessonIndex = useMemo(() => {
-    return lessons.findIndex((l) => l.id === currentLessonId || l.slug === currentLessonId);
-  }, [lessons, currentLessonId]);
-
-  const lesson = lessonIndex !== -1 ? lessons[lessonIndex] : null;
-  const prevLesson = lessonIndex > 0 ? lessons[lessonIndex - 1] : null;
-  const nextLesson = lessonIndex !== -1 && lessonIndex < lessons.length - 1 ? lessons[lessonIndex + 1] : null;
-
+  // Fetch full single lesson from GET /api/lessons/:slug
   useEffect(() => {
-    if (currentLessonId) {
-      setLastVisitedLesson(currentLessonId);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [currentLessonId, setLastVisitedLesson]);
+    let isMounted = true;
+    if (!currentLessonId) return;
 
-  if (!lesson) {
+    const fetchDetail = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const raw = await learningService.getLessonBySlug(currentLessonId);
+        if (isMounted) {
+          if (raw) {
+            setLessonData(mapBackendLesson(raw));
+          } else {
+            // Check contextLessons if available
+            const cached = (contextLessons || []).find(
+              (l) => l.slug === currentLessonId || l.id === currentLessonId
+            );
+            if (cached) {
+              setLessonData(cached);
+            } else {
+              setLessonData(null);
+            }
+          }
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.warn(`Error loading lesson ${currentLessonId}:`, err);
+          const cached = (contextLessons || []).find(
+            (l) => l.slug === currentLessonId || l.id === currentLessonId
+          );
+          if (cached) {
+            setLessonData(cached);
+          } else {
+            setError(err.message || 'Failed to load lesson');
+            setLessonData(null);
+          }
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchDetail();
+    setLastVisitedLesson(currentLessonId);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentLessonId, contextLessons, setLastVisitedLesson]);
+
+  // Compute prev/next from contextLessons
+  const lessonIndex = useMemo(() => {
+    return (contextLessons || []).findIndex(
+      (l) => l.slug === currentLessonId || l.id === currentLessonId
+    );
+  }, [contextLessons, currentLessonId]);
+
+  const prevLesson = lessonIndex > 0 ? contextLessons[lessonIndex - 1] : null;
+  const nextLesson =
+    lessonIndex !== -1 && lessonIndex < (contextLessons || []).length - 1
+      ? contextLessons[lessonIndex + 1]
+      : null;
+
+  if (loading) {
+    return <LessonDetailSkeleton />;
+  }
+
+  if (!lessonData || error) {
     return (
       <div className="w-full flex-1 bg-background text-foreground flex items-center justify-center p-4">
         <div className="card-glass max-w-md rounded-2xl p-8 text-center space-y-4">
           <AlertCircle className="mx-auto text-destructive" size={36} />
           <h1 className="font-display text-2xl font-bold">Lesson Not Found</h1>
-          <p className="text-xs text-muted-foreground">The requested typing lesson could not be found in our curriculum.</p>
+          <p className="text-xs text-muted-foreground">
+            {error || 'The requested typing lesson could not be found in our database.'}
+          </p>
           <Link
             to="/learn"
             className="bg-gradient-primary glow-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-semibold text-primary-foreground"
@@ -78,11 +175,14 @@ export const LessonDetail = () => {
     );
   }
 
-  const completed = isCompleted(lesson.id);
-  const bookmarked = isBookmarked(lesson.id);
+  const lesson = lessonData;
+  const targetId = lesson.slug || lesson.id;
+  const completed = isCompleted(targetId);
+  const bookmarked = isBookmarked(targetId);
+  const totalCount = totalLessons || (contextLessons ? contextLessons.length : 0);
 
   const handleComplete = (score = 100) => {
-    markLessonCompleted(lesson.id, score);
+    markLessonCompleted(targetId, score);
     setShowCompletionBanner(true);
     confetti({
       particleCount: 80,
@@ -119,7 +219,9 @@ export const LessonDetail = () => {
           </Link>
 
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="font-mono font-semibold text-primary">Lesson {lesson.lessonNumber} of {TYPING_LESSONS.length}</span>
+            <span className="font-mono font-semibold text-primary">
+              Lesson {lesson.lessonNumber} of {totalCount}
+            </span>
           </div>
         </div>
 
@@ -146,7 +248,7 @@ export const LessonDetail = () => {
                   </span>
                   <button
                     type="button"
-                    onClick={() => toggleBookmark(lesson.id)}
+                    onClick={() => toggleBookmark(targetId)}
                     className="flex items-center gap-1 text-xs text-muted-foreground hover:text-pink transition-colors"
                   >
                     {bookmarked ? <BookmarkCheck size={16} className="text-pink" /> : <Bookmark size={16} />}
@@ -173,8 +275,11 @@ export const LessonDetail = () => {
 
             {/* Reading Sections */}
             <div className="space-y-6">
-              {lesson.sections.map((sec, idx) => (
-                <article key={idx} className="card-glass rounded-2xl p-6 sm:p-8 shadow-lg space-y-4 border border-border/60 hover:border-border hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.2)] hover:-translate-y-0.5 transition-all duration-300">
+              {(lesson.sections || []).map((sec, idx) => (
+                <article
+                  key={idx}
+                  className="card-glass rounded-2xl p-6 sm:p-8 shadow-lg space-y-4 border border-border/60 hover:border-border hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.2)] hover:-translate-y-0.5 transition-all duration-300"
+                >
                   <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
                     {sec.heading}
                   </h2>
@@ -184,7 +289,7 @@ export const LessonDetail = () => {
                   </div>
 
                   {/* Callout Box */}
-                  {sec.callout && (
+                  {sec.callout && sec.callout.text && (
                     <div
                       className={`rounded-xl border p-4 text-xs sm:text-sm flex items-start gap-3 ${
                         sec.callout.type === 'tip'
@@ -196,7 +301,7 @@ export const LessonDetail = () => {
                     >
                       <Lightbulb size={18} className="shrink-0 text-primary mt-0.5" />
                       <div className="leading-relaxed">
-                        <strong className="block font-semibold mb-0.5 capitalize">{sec.callout.type}</strong>
+                        <strong className="block font-semibold mb-0.5 capitalize">{sec.callout.type || 'Note'}</strong>
                         <span>{sec.callout.text}</span>
                       </div>
                     </div>
@@ -290,7 +395,7 @@ export const LessonDetail = () => {
           {/* Right Sticky Sidebar */}
           <div className="hidden lg:block">
             <div className="sticky top-24">
-              <LessonSidebar currentLessonId={lesson.id} />
+              <LessonSidebar currentLessonId={targetId} />
             </div>
           </div>
         </div>

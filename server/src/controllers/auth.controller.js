@@ -10,6 +10,8 @@ const formatUser = (user) => ({
   username: user.username,
   email: user.email,
   role: user.role,
+  active: user.active !== false,
+  status: user.status || 'active',
   avatar: user.avatar,
   bio: user.bio,
   bestWpm: user.bestWpm,
@@ -26,13 +28,14 @@ export const registerUser = async (req, res, next) => {
     const {user,token} = await authService.registerUser(req.body);
 
     res.cookie(
-  'accessToken',
-  token,
-  authCookieOptions
-);
+      'accessToken',
+      token,
+      authCookieOptions
+    );
 
     return res.status(201).json({
       success: true,
+      token,
       user: formatUser(user),
     });
   } catch (error) {
@@ -42,17 +45,19 @@ export const registerUser = async (req, res, next) => {
 
 export const loginUser = async (req, res, next) => {
   try {
-    const { identifier, password } = req.body;
+    const { identifier, email, username, password } = req.body;
+    const loginIdentifier = identifier || email || username;
 
-    const { user, token } = await authService.loginUser( identifier, password);
+    const { user, token } = await authService.loginUser( loginIdentifier, password);
 
-res.cookie(
-  'accessToken',
-  token,
-  authCookieOptions
-);
+    res.cookie(
+      'accessToken',
+      token,
+      authCookieOptions
+    );
     return res.status(200).json({
       success: true,
+      token,
       user: formatUser(user),
     });
   } catch (error) {

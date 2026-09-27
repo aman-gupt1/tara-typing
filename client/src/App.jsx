@@ -33,6 +33,21 @@ import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import PageTransition from './components/common/PageTransition';
 
+// Admin Dashboard Components & Pages
+import AdminLayout from './components/admin/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminTypingTests from './pages/admin/AdminTypingTests';
+import AdminLeaderboard from './pages/admin/AdminLeaderboard';
+import AdminChallenges from './pages/admin/AdminChallenges';
+import AdminLearning from './pages/admin/AdminLearning';
+import AdminAchievements from './pages/admin/AdminAchievements';
+import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminReports from './pages/admin/AdminReports';
+import AdminAnnouncements from './pages/admin/AdminAnnouncements';
+import AdminSettingsPage from './pages/admin/AdminSettings';
+import AdminSecurity from './pages/admin/AdminSecurity';
+
 function ScrollToTop() {
   const { pathname } = useLocation();
 
@@ -62,9 +77,7 @@ function AppContent() {
               path="/learn/lesson/:lessonId"
               element={
                 <PageTransition>
-                  <ProtectedRoute>
-                    <LessonDetail />
-                  </ProtectedRoute>
+                  <LessonDetail />
                 </PageTransition>
               }
             />
@@ -72,9 +85,15 @@ function AppContent() {
               path="/learn/lesson/:slug"
               element={
                 <PageTransition>
-                  <ProtectedRoute>
-                    <LessonDetail />
-                  </ProtectedRoute>
+                  <LessonDetail />
+                </PageTransition>
+              }
+            />
+            <Route
+              path="/learn/:slug"
+              element={
+                <PageTransition>
+                  <LessonDetail />
                 </PageTransition>
               }
             />
@@ -113,6 +132,31 @@ function AppContent() {
             <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
             <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
             <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+
+            {/* Admin Dashboard Routes (Strictly Guarded for Authenticated Admins) */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="dashboard" element={<Navigate to="/admin" replace />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="typing-tests" element={<AdminTypingTests />} />
+              <Route path="leaderboard" element={<AdminLeaderboard />} />
+              <Route path="challenges" element={<AdminChallenges />} />
+              <Route path="learning" element={<AdminLearning />} />
+              <Route path="achievements" element={<AdminAchievements />} />
+              <Route path="analytics" element={<AdminAnalytics />} />
+              <Route path="reports" element={<AdminReports />} />
+              <Route path="announcements" element={<AdminAnnouncements />} />
+              <Route path="settings" element={<AdminSettingsPage />} />
+              <Route path="security" element={<AdminSecurity />} />
+            </Route>
+
             <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
           </Routes>
         </AnimatePresence>

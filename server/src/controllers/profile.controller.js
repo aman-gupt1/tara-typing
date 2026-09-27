@@ -28,17 +28,13 @@ export const getProfile = async (
 
 // Update user profile
 
-export const updateProfile = async (
-  req,
-  res,
-  next
-) => {
+export const updateProfile = async (req, res, next) => {
   try {
-    const user =
-      await profileService.updateProfile(
-        req.user._id,
-        req.body
-      );
+    const user = await profileService.updateProfile(
+      req.user._id,
+      req.body,
+      req.file
+    );
 
     return res.status(200).json({
       success: true,

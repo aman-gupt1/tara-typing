@@ -15,6 +15,7 @@ import {
   Flame,
   Info,
   GraduationCap,
+  ShieldCheck,
 } from 'lucide-react';
 import UserAvatar from '../common/UserAvatar';
 import RoleBadge from '../common/RoleBadge';
@@ -182,6 +183,18 @@ export const MobileSidebar = ({ open, onClose }) => {
                       Account
                     </p>
                     <nav className="space-y-1">
+                      {user?.role === 'admin' && (
+                        <NavLink
+                          to="/admin"
+                          onClick={onClose}
+                          className={({ isActive }) =>
+                            `flex h-11 items-center gap-3 rounded-xl px-3.5 text-sm font-semibold transition-colors select-none text-purple-600 dark:text-purple-400 bg-purple-500/10 border border-purple-500/20`
+                          }
+                        >
+                          <ShieldCheck size={18} aria-hidden="true" className="shrink-0" />
+                          <span>Admin Dashboard</span>
+                        </NavLink>
+                      )}
                       <NavLink
                         to="/profile"
                         onClick={onClose}

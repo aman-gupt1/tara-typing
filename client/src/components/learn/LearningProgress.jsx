@@ -58,7 +58,7 @@ export const LearningProgress = () => {
             </div>
 
             <Link
-              to={`/learn/lesson/${recommendedLesson.id}`}
+              to={`/learn/lesson/${recommendedLesson.slug || recommendedLesson.id}`}
               className="bg-gradient-primary glow-primary flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-xs sm:text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.02] select-none"
             >
               <Play size={14} />

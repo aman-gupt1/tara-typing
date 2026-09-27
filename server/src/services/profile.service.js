@@ -1,3 +1,5 @@
+import { uploadImage } from "./cloudinary.js";
+
 class ProfileService {
   constructor(User) {
     this.User = User;
@@ -17,7 +19,7 @@ class ProfileService {
   }
 
   // Update user profile
-  async updateProfile(userId, data) {
+  async updateProfile(userId, data, file) {
     const user = await this.User.findById(userId);
 
     if (!user) {
@@ -61,16 +63,23 @@ class ProfileService {
       user.name = name;
     }
 
-    if (avatar) {
-      user.avatar = avatar;
-    }
-
     if (bio !== undefined) {
       user.bio = bio.slice(0, 160);
     }
 
     if (location !== undefined) {
       user.location = location;
+    }
+
+    // Avatar upload handling
+    if (file) {
+      const result = await uploadImage(
+        file.buffer,
+        'tara-typing/avatars'
+      );
+      user.avatar = result.secure_url;
+    } else if (avatar !== undefined) {
+      user.avatar = avatar;
     }
 
     return await user.save();

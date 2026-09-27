@@ -1,11 +1,9 @@
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Circle, BookOpen, Layers } from 'lucide-react';
-import { LESSON_CATEGORIES, TYPING_LESSONS } from '../../data/typingLessons';
 import { useLearn } from '../../context/LearnContext';
 
 export const LessonSidebar = ({ currentLessonId = '' }) => {
-  const { lessons: contextLessons, isCompleted, progressPercentage, completedCount, totalLessons } = useLearn();
-  const lessons = contextLessons && contextLessons.length > 0 ? contextLessons : TYPING_LESSONS;
+  const { lessons, categories, isCompleted, progressPercentage, completedCount, totalLessons } = useLearn();
 
   return (
     <aside className="card-glass h-fit rounded-2xl p-4 sm:p-5 shadow-xl space-y-5 border border-border/60 hover:border-primary/40 hover:shadow-[0_12px_28px_-6px_rgba(59,130,246,0.15)] transition-all duration-300" aria-label="Course Curriculum Navigation">
@@ -34,8 +32,8 @@ export const LessonSidebar = ({ currentLessonId = '' }) => {
 
       {/* Categorized Lessons List */}
       <div className="space-y-4 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
-        {LESSON_CATEGORIES.map((cat) => {
-          const catLessons = lessons.filter((l) => l.categoryId === cat.id);
+        {categories.map((cat) => {
+          const catLessons = (lessons || []).filter((l) => l.categoryId === cat.id);
           if (catLessons.length === 0) return null;
 
           return (
@@ -47,13 +45,14 @@ export const LessonSidebar = ({ currentLessonId = '' }) => {
 
               <div className="space-y-1">
                 {catLessons.map((lesson) => {
-                  const isActive = lesson.id === currentLessonId;
-                  const completed = isCompleted(lesson.id);
+                  const lessonKey = lesson.slug || lesson.id;
+                  const isActive = lessonKey === currentLessonId || lesson.id === currentLessonId || lesson.slug === currentLessonId;
+                  const completed = isCompleted(lessonKey);
 
                   return (
                     <Link
-                      key={lesson.id}
-                      to={`/learn/lesson/${lesson.id}`}
+                      key={lessonKey}
+                      to={`/learn/lesson/${lessonKey}`}
                       className={`group flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs transition-all select-none ${
                         isActive
                           ? 'bg-primary/20 text-primary font-semibold border border-primary/40 shadow-sm'

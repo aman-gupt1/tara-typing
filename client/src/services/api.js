@@ -11,20 +11,29 @@ export const apiRequest = async (endpoint, options = {}) => {
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const url = `${API_BASE_URL}${cleanEndpoint}`;
 
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+
   const headers = {
-    'Content-Type': 'application/json',
     ...options.headers,
   };
+
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  } else {
+    delete headers['Content-Type'];
+    delete headers['content-type'];
+  }
 
   const config = {
     ...options,
     headers,
     credentials: 'include', // Essential for sending and receiving HTTP-only accessToken cookies
+    body: isFormData
+      ? options.body
+      : options.body && typeof options.body === 'object'
+        ? JSON.stringify(options.body)
+        : options.body,
   };
-
-  if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
-    config.body = JSON.stringify(options.body);
-  }
 
   try {
     const response = await fetch(url, config);
@@ -38,6 +47,17 @@ export const apiRequest = async (endpoint, options = {}) => {
     }
 
     if (!response.ok) {
+      const isBlocked =
+        response.status === 403 &&
+        typeof data === 'object' &&
+        (data?.message?.includes('blocked') || data?.message?.includes('deactivated') || data?.message?.includes('suspended'));
+
+      if ((response.status === 401 || isBlocked) && !endpoint.includes('/auth/login')) {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+        }
+      }
+
       const message =
         (typeof data === 'object' && data?.message) ||
         (typeof data === 'string' && data) ||

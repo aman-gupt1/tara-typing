@@ -22,6 +22,12 @@ export const AuthProvider = ({ children }) => {
       }
     };
     initAuth();
+
+    const handleUnauthorized = () => {
+      setUser(null);
+    };
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, []);
 
   const login = async (idOrCredentials, optionalPassword) => {
@@ -48,22 +54,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginDemo = async () => {
-    try {
-      const demoUser = await authService.loginDemo();
-      setUser(demoUser);
-      toast.success("Logged in as Demo User!", { toastId: 'auth-demo-login-success' });
-      return demoUser;
-    } catch (err) {
-      toast.error("Failed to load demo user", { toastId: 'auth-demo-login-error' });
-      throw err;
-    }
-  };
 
   const logout = async () => {
-    await authService.logout();
-    setUser(null);
-    toast.info("Logged out successfully", { toastId: 'auth-logout-success' });
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.warn("Logout warning:", err);
+    } finally {
+      setUser(null);
+      toast.info("Logged out successfully", { toastId: 'auth-logout-success' });
+    }
   };
 
   const changePassword = async (currentPassword, newPassword) => {
@@ -89,8 +89,6 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated: !!user,
         login,
         register,
-        loginDemo,
-        demoLogin: loginDemo, // Alias for 1-click shortcuts in Login/Register
         logout,
         changePassword,
         updateUser,

@@ -13,6 +13,7 @@ export const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
     location: user?.location || '',
     bio: user?.bio || '',
     avatar: user?.avatar || '',
+    avatarFile: null,
   });
 
   const [errors, setErrors] = useState({});
@@ -26,6 +27,7 @@ export const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
     location: user?.location || '',
     bio: user?.bio || '',
     avatar: user?.avatar || '',
+    avatarFile: null,
   });
 
   useEffect(() => {
@@ -37,6 +39,7 @@ export const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
         location: user.location || '',
         bio: user.bio || '',
         avatar: user.avatar || '',
+        avatarFile: null,
       };
       setFormData(data);
       initialDataRef.current = data;
@@ -45,7 +48,10 @@ export const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
     }
   }, [user, isOpen]);
 
-  const isDirty = JSON.stringify(formData) !== JSON.stringify(initialDataRef.current);
+  const isDirty =
+    Boolean(formData.avatarFile) ||
+    JSON.stringify({ ...formData, avatarFile: null }) !==
+      JSON.stringify({ ...initialDataRef.current, avatarFile: null });
 
   const handleCloseAttempt = () => {
     if (loading) return;
@@ -80,7 +86,11 @@ export const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
     if (!file || !file.type.startsWith('image/')) return;
     const reader = new FileReader();
     reader.onload = () => {
-      setFormData((prev) => ({ ...prev, avatar: String(reader.result) }));
+      setFormData((prev) => ({
+        ...prev,
+        avatar: String(reader.result), // preview only
+        avatarFile: file,              // actual file for upload
+      }));
     };
     reader.readAsDataURL(file);
   };
@@ -100,6 +110,7 @@ export const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
           email: formData.email.trim(),
           location: (formData.location || '').trim(),
           bio: formData.bio.trim(),
+          avatarFile: formData.avatarFile,
         });
         onClose();
       } catch (err) {
@@ -220,7 +231,7 @@ export const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
                 {!isDefaultOrEmptyAvatar(formData.avatar) && (
                   <button
                     type="button"
-                    onClick={() => setFormData((prev) => ({ ...prev, avatar: '' }))}
+                    onClick={() => setFormData((prev) => ({ ...prev, avatar: '', avatarFile: null }))}
                     className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10 focus-visible:outline-2 focus-visible:outline-ring"
                   >
                     Use Name Letter

@@ -6,23 +6,25 @@ import { useState } from 'react';
 export const isDefaultOrEmptyAvatar = (avatarUrl) => {
   if (!avatarUrl || typeof avatarUrl !== 'string') return true;
   const trimmed = avatarUrl.trim();
-  if (trimmed === '') return true;
+  if (trimmed === '' || trimmed === 'null' || trimmed === 'undefined') return true;
   if (trimmed.includes('photo-1535713875002-d1d0cf377fde')) return true; // Backend default avatar
-  if (trimmed.includes('dicebear.com')) return true;
+  if (trimmed.includes('dicebear')) return true; // Default dicebear robot/bottts avatars
   return false;
 };
 
 /**
- * Generates clean, intelligent initials from a user's name or username.
+ * Generates clean, intelligent first letter or initials from a user's name or username.
  * Example:
- *   "Aman Kumar" -> "AK"
- *   "Tara Typist" -> "TT"
- *   "Aman" -> "AK" (or "AM")
- *   "@aman" -> "AM"
+ *   "Aman Gupta" with firstLetterOnly=true -> "A"
+ *   "Aman Kumar" with firstLetterOnly=false -> "AK"
+ *   "Tara Typist" -> "T"
  */
-export const getInitials = (name = '', username = '') => {
+export const getInitials = (name = '', username = '', firstLetterOnly = true) => {
   const cleanName = (name || '').trim();
   if (cleanName) {
+    if (firstLetterOnly) {
+      return cleanName.charAt(0).toUpperCase();
+    }
     const parts = cleanName.split(/\s+/).filter(Boolean);
     if (parts.length >= 2) {
       const first = parts[0].charAt(0);
@@ -38,14 +40,17 @@ export const getInitials = (name = '', username = '') => {
   }
 
   const cleanUser = (username || '').trim().replace(/^@/, '');
-  if (cleanUser.length >= 2) {
-    return cleanUser.slice(0, 2).toUpperCase();
-  }
-  if (cleanUser.length === 1) {
+  if (cleanUser) {
+    if (firstLetterOnly) {
+      return cleanUser.charAt(0).toUpperCase();
+    }
+    if (cleanUser.length >= 2) {
+      return cleanUser.slice(0, 2).toUpperCase();
+    }
     return cleanUser.charAt(0).toUpperCase();
   }
 
-  return 'TT';
+  return 'T';
 };
 
 /**
@@ -81,11 +86,12 @@ export const UserAvatar = ({
   alt,
   interactive = false,
   rounded = 'rounded-full',
+  firstLetterOnly = true,
 }) => {
   const [imageError, setImageError] = useState(false);
 
   const displayName = (name || username || 'User').trim();
-  const initials = getInitials(name, username);
+  const initials = getInitials(name, username, firstLetterOnly);
   const hasUploadedCustomAvatar = !isDefaultOrEmptyAvatar(src) && !imageError;
 
   const hoverEffect = interactive ? 'transition-transform duration-150 hover:scale-[1.03]' : '';

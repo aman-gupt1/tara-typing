@@ -107,28 +107,6 @@ export const authService = {
       throw err;
     }
   },
-
-  /**
-   * 1-Click Demo Login
-   */
-  loginDemo: async () => {
-    try {
-      return await authService.login('taratypist', 'password123');
-    } catch (err) {
-      // If demo user hasn't been seeded yet, register and login
-      try {
-        return await authService.register({
-          name: 'Tara Demo User',
-          username: 'taratypist',
-          email: 'demo@taratyping.com',
-          password: 'password123',
-        });
-      } catch (regErr) {
-        // Retry login if already exists
-        return await authService.login('taratypist', 'password123');
-      }
-    }
-  },
 };
 
 export default authService;

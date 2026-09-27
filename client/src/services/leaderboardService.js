@@ -2,11 +2,14 @@ import { api } from './api';
 
 export const leaderboardService = {
   /**
-   * Get leaderboard list for selected period ('today', 'week'/'thisWeek', 'month'/'thisMonth', 'allTime') and duration
-   * GET /api/leaderboard?period=...&duration=...
+   * Get leaderboard rankings for selected period and duration.
+   * GET /api/leaderboard?period={period}&duration={duration}
+   *
+   * Supported periods: 'allTime', 'today', 'thisWeek', 'thisMonth'
+   * Supported durations: 'all', '15', '30', '60', '120'
    */
-  getLeaderboard: async (period = 'allTime', duration = 30) => {
-    const keyMap = {
+  getLeaderboard: async (period = 'allTime', duration = 'all') => {
+    const periodMap = {
       today: 'today',
       week: 'thisWeek',
       thisWeek: 'thisWeek',
@@ -15,23 +18,16 @@ export const leaderboardService = {
       allTime: 'allTime',
     };
 
-    const targetPeriod = keyMap[period] || 'allTime';
+    const targetPeriod = periodMap[period] || 'allTime';
+    const targetDuration = duration ?? 'all';
 
-    try {
-      const res = await api.get(`/leaderboard?period=${targetPeriod}&duration=${duration}`);
-      return {
-        leaderboard: res?.leaderboard || [],
-        period: targetPeriod,
-        duration,
-      };
-    } catch (err) {
-      console.warn('Leaderboard fetch warning:', err.message);
-      return {
-        leaderboard: [],
-        period: targetPeriod,
-        duration,
-      };
-    }
+    const res = await api.get(`/leaderboard?period=${targetPeriod}&duration=${targetDuration}`);
+    return {
+      success: res?.success ?? true,
+      leaderboard: res?.leaderboard || [],
+      period: targetPeriod,
+      duration: targetDuration,
+    };
   },
 
   /**

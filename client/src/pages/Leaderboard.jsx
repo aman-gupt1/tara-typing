@@ -11,367 +11,23 @@ import UserAvatar from '../components/common/UserAvatar';
 
 /* ─── Constants ──────────────────────────────────────────────── */
 const periods = [
-  { id: 'today',   label: 'Today'      },
-  { id: 'week',    label: 'This Week'  },
-  { id: 'month',   label: 'This Month' },
-  { id: 'allTime', label: 'All Time'   },
+  { id: 'today',     label: 'Today'      },
+  { id: 'thisWeek',  label: 'This Week'  },
+  { id: 'thisMonth', label: 'This Month' },
+  { id: 'allTime',   label: 'All Time'   },
 ];
 
 const durationOptions = [
   { id: 'all', label: 'All',   value: 'all' },
-  { id: '15',  label: '15s',   value: 15    },
-  { id: '30',  label: '30s',   value: 30    },
-  { id: '60',  label: '60s',   value: 60    },
-  { id: '120', label: '120s',  value: 120   },
+  { id: '15',  label: '15s',   value: '15'  },
+  { id: '30',  label: '30s',   value: '30'  },
+  { id: '60',  label: '60s',   value: '60'  },
+  { id: '120', label: '120s',  value: '120' },
 ];
-
-/* ─── Default Showcase Top 3 Champions (from design reference) ─── */
-const DEFAULT_TOP3 = [
-  {
-    rank: 1,
-    name: 'max_type',
-    username: 'max_type',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-    country: 'India',
-    flag: '🇮🇳',
-    wpm: 154,
-    accuracy: 99.4,
-    tests: 312,
-  },
-  {
-    rank: 2,
-    name: 'speed_demon',
-    username: 'speed_demon',
-    avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80',
-    country: 'United States',
-    flag: '🇺🇸',
-    wpm: 148,
-    accuracy: 98.9,
-    tests: 231,
-  },
-  {
-    rank: 3,
-    name: 'key_master',
-    username: 'key_master',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
-    country: 'United Kingdom',
-    flag: '🇬🇧',
-    wpm: 142,
-    accuracy: 98.5,
-    tests: 198,
-  },
-];
-
-/* ─── 20 Realistic Showcase Typists (Matching Figma Mockup) ──── */
-const BASE_DUMMY_USERS = [
-  {
-    id: 'u1',
-    name: 'max_type',
-    username: 'max_type',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-    country: 'India',
-    flag: '🇮🇳',
-    baseWpm: 154,
-    baseAccuracy: 99.4,
-    baseTests: 312,
-  },
-  {
-    id: 'u2',
-    name: 'speed_demon',
-    username: 'speed_demon',
-    avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80',
-    country: 'United States',
-    flag: '🇺🇸',
-    baseWpm: 148,
-    baseAccuracy: 98.9,
-    baseTests: 231,
-  },
-  {
-    id: 'u3',
-    name: 'key_master',
-    username: 'key_master',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
-    country: 'United Kingdom',
-    flag: '🇬🇧',
-    baseWpm: 142,
-    baseAccuracy: 98.5,
-    baseTests: 198,
-  },
-  {
-    id: 'u4',
-    name: 'typing_ninja',
-    username: 'typing_ninja',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    country: 'Japan',
-    flag: '🇯🇵',
-    baseWpm: 135,
-    baseAccuracy: 97.8,
-    baseTests: 176,
-  },
-  {
-    id: 'u5',
-    name: 'code_writer',
-    username: 'code_writer',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    country: 'Germany',
-    flag: '🇩🇪',
-    baseWpm: 132,
-    baseAccuracy: 97.1,
-    baseTests: 145,
-  },
-  {
-    id: 'u6',
-    name: 'word_hunter',
-    username: 'word_hunter',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
-    country: 'Canada',
-    flag: '🇨🇦',
-    baseWpm: 128,
-    baseAccuracy: 96.9,
-    baseTests: 134,
-  },
-  {
-    id: 'u7',
-    name: 'type_king',
-    username: 'type_king',
-    avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80',
-    country: 'Australia',
-    flag: '🇦🇺',
-    baseWpm: 125,
-    baseAccuracy: 96.4,
-    baseTests: 129,
-  },
-  {
-    id: 'u8',
-    name: 'pixel_typist',
-    username: 'pixel_typist',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
-    country: 'India',
-    flag: '🇮🇳',
-    baseWpm: 123,
-    baseAccuracy: 96.1,
-    baseTests: 118,
-  },
-  {
-    id: 'u9',
-    name: 'alpha_keys',
-    username: 'alpha_keys',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    country: 'France',
-    flag: '🇫🇷',
-    baseWpm: 121,
-    baseAccuracy: 95.8,
-    baseTests: 110,
-  },
-  {
-    id: 'u10',
-    name: 'silent_type',
-    username: 'silent_type',
-    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80',
-    country: 'Singapore',
-    flag: '🇸🇬',
-    baseWpm: 118,
-    baseAccuracy: 95.6,
-    baseTests: 104,
-  },
-  {
-    id: 'u11',
-    name: 'turbo_fingers',
-    username: 'turbo_fingers',
-    avatar: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=150&auto=format&fit=crop&q=80',
-    country: 'Netherlands',
-    flag: '🇳🇱',
-    baseWpm: 115,
-    baseAccuracy: 95.3,
-    baseTests: 98,
-  },
-  {
-    id: 'u12',
-    name: 'quick_strike',
-    username: 'quick_strike',
-    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80',
-    country: 'South Korea',
-    flag: '🇰🇷',
-    baseWpm: 112,
-    baseAccuracy: 95.1,
-    baseTests: 92,
-  },
-  {
-    id: 'u13',
-    name: 'matrix_racer',
-    username: 'matrix_racer',
-    avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80',
-    country: 'Brazil',
-    flag: '🇧🇷',
-    baseWpm: 109,
-    baseAccuracy: 94.8,
-    baseTests: 85,
-  },
-  {
-    id: 'u14',
-    name: 'swift_click',
-    username: 'swift_click',
-    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
-    country: 'Spain',
-    flag: '🇪🇸',
-    baseWpm: 106,
-    baseAccuracy: 94.5,
-    baseTests: 79,
-  },
-  {
-    id: 'u15',
-    name: 'hyper_text',
-    username: 'hyper_text',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
-    country: 'Sweden',
-    flag: '🇸🇪',
-    baseWpm: 104,
-    baseAccuracy: 94.2,
-    baseTests: 72,
-  },
-  {
-    id: 'u16',
-    name: 'key_wizard',
-    username: 'key_wizard',
-    avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150&auto=format&fit=crop&q=80',
-    country: 'New Zealand',
-    flag: '🇳🇿',
-    baseWpm: 101,
-    baseAccuracy: 94.0,
-    baseTests: 68,
-  },
-  {
-    id: 'u17',
-    name: 'flow_state',
-    username: 'flow_state',
-    avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&auto=format&fit=crop&q=80',
-    country: 'Switzerland',
-    flag: '🇨🇭',
-    baseWpm: 98,
-    baseAccuracy: 93.8,
-    baseTests: 64,
-  },
-  {
-    id: 'u18',
-    name: 'rhythm_type',
-    username: 'rhythm_type',
-    avatar: 'https://images.unsplash.com/photo-1534751516642-a171edd2521d?w=150&auto=format&fit=crop&q=80',
-    country: 'Italy',
-    flag: '🇮🇹',
-    baseWpm: 95,
-    baseAccuracy: 93.5,
-    baseTests: 59,
-  },
-  {
-    id: 'u19',
-    name: 'apex_keys',
-    username: 'apex_keys',
-    avatar: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=150&auto=format&fit=crop&q=80',
-    country: 'Norway',
-    flag: '🇳🇴',
-    baseWpm: 92,
-    baseAccuracy: 93.2,
-    baseTests: 54,
-  },
-  {
-    id: 'u20',
-    name: 'ghost_typist',
-    username: 'ghost_typist',
-    avatar: 'https://images.unsplash.com/photo-1517070208541-6ddc4d3efbcb?w=150&auto=format&fit=crop&q=80',
-    country: 'Ireland',
-    flag: '🇮🇪',
-    baseWpm: 89,
-    baseAccuracy: 93.0,
-    baseTests: 48,
-  },
-];
-
-function generateLeaderboardData(period, duration, realEntries = [], currentUser = null) {
-  let wpmOffset = 0;
-  if (duration === '15') wpmOffset = 12;
-  else if (duration === '30') wpmOffset = 0;
-  else if (duration === '60') wpmOffset = -8;
-  else if (duration === '120') wpmOffset = -15;
-  else if (duration === 'all') wpmOffset = 6;
-
-  const periodConfig = {
-    today: {
-      testMult: 0.12,
-      minTests: 8,
-      times: ['15m ago', '42m ago', '1 hour ago', '2 hours ago', '3 hours ago', '5 hours ago', '7 hours ago', '9 hours ago'],
-    },
-    week: {
-      testMult: 0.35,
-      minTests: 25,
-      times: ['Today', 'Yesterday', '2 days ago', '3 days ago', '4 days ago', '5 days ago'],
-    },
-    month: {
-      testMult: 0.7,
-      minTests: 60,
-      times: ['Yesterday', '3 days ago', '1 week ago', '2 weeks ago', '3 weeks ago'],
-    },
-    allTime: {
-      testMult: 1,
-      minTests: 100,
-      times: ['2 hours ago', '3 hours ago', '5 hours ago', '6 hours ago', '8 hours ago', '10 hours ago', '12 hours ago'],
-    },
-  };
-
-  const pCfg = periodConfig[period] || periodConfig.allTime;
-
-  const list = BASE_DUMMY_USERS.map((user, idx) => {
-    const wpm = Math.max(40, user.baseWpm + wpmOffset);
-    const accuracy = Number(user.baseAccuracy.toFixed(1));
-    const tests = Math.max(pCfg.minTests, Math.round(user.baseTests * pCfg.testMult));
-    const time = pCfg.times[idx % pCfg.times.length];
-
-    return {
-      _id: user.id,
-      name: user.name,
-      username: user.username,
-      avatar: user.avatar,
-      country: user.country,
-      flag: user.flag,
-      wpm,
-      accuracy,
-      tests,
-      date: time,
-      isCurrentUser: false,
-    };
-  });
-
-  // Merge real entries if present from backend
-  (realEntries || []).forEach((real) => {
-    const isYou = real.isCurrentUser || (currentUser && real.username === currentUser.username);
-    const existingIndex = list.findIndex((m) => m.username === real.username);
-    const formatted = {
-      ...real,
-      country: real.country || 'India',
-      flag: real.flag || '🇮🇳',
-      isCurrentUser: isYou,
-      isYou,
-      date: real.date ? formatRelativeTime(real.date) : 'Just now',
-    };
-    if (existingIndex >= 0) {
-      list[existingIndex] = formatted;
-    } else {
-      list.push(formatted);
-    }
-  });
-
-  // Sort by WPM descending initially
-  list.sort((a, b) => (b.wpm || 0) - (a.wpm || 0));
-
-  return list.map((item, idx) => ({
-    ...item,
-    rank: idx + 1,
-  }));
-}
-
 
 /* ─── Relative Time Helper ────────────────────────────────────── */
 function formatRelativeTime(dateString) {
-  if (!dateString) return '2 hours ago';
+  if (!dateString) return 'Just now';
   if (typeof dateString === 'string' && dateString.toLowerCase().includes('today')) return 'Today';
   if (typeof dateString === 'string' && dateString.toLowerCase().includes('week')) return 'This week';
 
@@ -440,7 +96,7 @@ function TableSkeleton({ rows = 8 }) {
   );
 }
 
-/* ─── Crown Badges & Laurel Wreaths (Matching Reference Design) ─── */
+/* ─── Crown Badges & Laurel Wreaths ───────────────────────────── */
 function CrownBadge({ rank }) {
   const configs = {
     1: {
@@ -556,14 +212,54 @@ function PodiumCard({ entry, position = 1 }) {
   };
 
   const cfg = configs[position] || configs[1];
-  const fallback = DEFAULT_TOP3[position - 1] || DEFAULT_TOP3[0];
+
+  if (!entry) {
+    return (
+      <article
+        className={`ldb-card group relative flex flex-col items-center rounded-2xl border border-dashed border-border/60 bg-[#0B1120]/60 ${cfg.elevation} px-3 pt-3.5 pb-2.5 sm:px-3.5 sm:pt-4 sm:pb-3 text-center transition-all duration-300 cursor-default select-none overflow-visible`}
+      >
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 opacity-40">
+          <CrownBadge rank={position} />
+        </div>
+        <div className="relative z-10 my-0.5 flex items-center justify-center w-24 h-14 sm:w-28 sm:h-16 mx-auto opacity-30">
+          <LaurelWreath color={cfg.crownColor} />
+          <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-full border border-dashed border-border/80 grid place-items-center text-xs font-bold text-muted-foreground">
+            #{position}
+          </div>
+        </div>
+        <div className="relative z-10 mt-1 min-w-0">
+          <h3 className="font-display text-xs sm:text-sm font-semibold text-muted-foreground truncate leading-tight">
+            Spot Available
+          </h3>
+          <p className="text-[11px] text-muted-foreground/60 truncate mt-0.5 leading-none">
+            Take test to rank
+          </p>
+        </div>
+        <div className="relative z-10 mt-2 sm:mt-2.5 grid w-full grid-cols-3 items-center text-center pt-1.5 border-t border-white/[0.04] opacity-40">
+          <div className="px-1">
+            <div className="font-display text-base font-bold text-muted-foreground leading-tight">—</div>
+            <div className="mt-0.5 text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase leading-none">WPM</div>
+          </div>
+          <div className="relative px-1">
+            <div className="font-display text-base font-bold text-muted-foreground">—</div>
+            <div className="mt-0.5 text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase leading-none">Accuracy</div>
+          </div>
+          <div className="px-1">
+            <div className="font-display text-base font-bold text-muted-foreground">—</div>
+            <div className="mt-0.5 text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase leading-none">Tests</div>
+          </div>
+        </div>
+      </article>
+    );
+  }
+
   const safeEntry = {
-    avatar: entry?.avatar || fallback.avatar,
-    name: entry?.name || entry?.username || fallback.name,
-    username: entry?.username || fallback.username,
-    wpm: entry?.wpm ?? fallback.wpm,
-    accuracy: entry?.accuracy ?? fallback.accuracy,
-    tests: entry?.tests ?? fallback.tests,
+    avatar: entry.avatar || '',
+    name: entry.name || entry.username || 'Anonymous',
+    username: entry.username || 'anonymous',
+    wpm: entry.wpm ?? 0,
+    accuracy: entry.accuracy ?? 0,
+    tests: entry.tests ?? 1,
   };
 
   return (
@@ -638,22 +334,29 @@ function PodiumCard({ entry, position = 1 }) {
   );
 }
 
-
-
 /* ─── Main Component ─────────────────────────────────────────── */
 export const Leaderboard = () => {
   const { user } = useAuth();
-  const [period,      setPeriod]      = useState('today');
+  const [period,      setPeriod]      = useState('allTime');
   const [duration,    setDuration]    = useState('all');
   const [search,      setSearch]      = useState('');
   const [rows,        setRows]        = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState(false);
-  const [sortField,   setSortField]   = useState('wpm');
+  const [sortField,   setSortField]   = useState(null);
   const [sortOrder,   setSortOrder]   = useState('desc');
   const [currentPage, setCurrentPage] = useState(1);
+  const [publicStats, setPublicStats] = useState(null);
   const pageSize = 8;
 
+  // Fetch public platform stats on mount
+  useEffect(() => {
+    leaderboardService.getPublicStats().then((data) => {
+      if (data) setPublicStats(data);
+    });
+  }, []);
+
+  // Fetch real leaderboard data from backend
   const fetchBoard = useCallback(async () => {
     setLoading(true);
     setError(false);
@@ -661,18 +364,45 @@ export const Leaderboard = () => {
       const durOpt = durationOptions.find((d) => d.id === duration);
       const durVal = durOpt?.value ?? 'all';
       const res = await leaderboardService.getLeaderboard(period, durVal);
-      const dynamicList = generateLeaderboardData(period, duration, res?.leaderboard || [], user);
-      setRows(dynamicList);
+      const rawList = res?.leaderboard || [];
+
+      // Map backend fields to existing UI attributes
+      const mapped = rawList.map((item, idx) => {
+        const isCurrentUser = Boolean(
+          item.isCurrentUser ||
+          (user && (item.username === user.username || (user._id && item.userId === user._id)))
+        );
+
+        return {
+          rank: item.rank ?? idx + 1,
+          name: item.name || item.username || 'Anonymous Typist',
+          username: item.username || 'anonymous',
+          avatar: item.avatar || '',
+          location: item.location || 'Unknown',
+          country: item.location || 'Unknown',
+          wpm: item.wpm ?? 0,
+          accuracy: item.accuracy ?? 0,
+          tests: item.tests ?? 1,
+          date: item.date ? formatRelativeTime(item.date) : 'Just now',
+          rawDate: item.date,
+          isCurrentUser,
+          isYou: isCurrentUser,
+        };
+      });
+
+      setRows(mapped);
     } catch (err) {
-      console.warn('Leaderboard API offline, utilizing generated showcase data:', err);
-      const fallbackList = generateLeaderboardData(period, duration, [], user);
-      setRows(fallbackList);
+      console.error('Leaderboard API fetch error:', err);
+      setError(true);
+      setRows([]);
     } finally {
       setLoading(false);
     }
   }, [period, duration, user]);
 
-  useEffect(() => { fetchBoard(); }, [fetchBoard]);
+  useEffect(() => {
+    fetchBoard();
+  }, [fetchBoard]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -693,35 +423,33 @@ export const Leaderboard = () => {
         (r) =>
           (r.name || '').toLowerCase().includes(search.toLowerCase()) ||
           (r.username || '').toLowerCase().includes(search.toLowerCase()) ||
-          (r.country || '').toLowerCase().includes(search.toLowerCase())
+          (r.location || r.country || '').toLowerCase().includes(search.toLowerCase())
       )
     : rows;
 
-  const sortedRows = [...filteredRows].sort((a, b) => {
-    const valA = a[sortField] ?? 0;
-    const valB = b[sortField] ?? 0;
-    return sortOrder === 'desc' ? valB - valA : valA - valB;
-  });
+  const sortedRows = sortField
+    ? [...filteredRows].sort((a, b) => {
+        const valA = a[sortField] ?? 0;
+        const valB = b[sortField] ?? 0;
+        return sortOrder === 'desc' ? valB - valA : valA - valB;
+      })
+    : filteredRows;
 
   const totalPages = Math.ceil(sortedRows.length / pageSize) || 1;
   const paginatedRows = sortedRows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
+  // Top 3 entries from the real API response
   const displayTop3 = [
-    sortedRows[0] || DEFAULT_TOP3[0],
-    sortedRows[1] || DEFAULT_TOP3[1],
-    sortedRows[2] || DEFAULT_TOP3[2],
+    rows[0] || null,
+    rows[1] || null,
+    rows[2] || null,
   ];
 
-  const yourEntry = rows.find((r) => r.isYou);
-  const maxWpm = rows.length > 0 ? Math.max(...rows.map((r) => r.wpm || 0)) : (displayTop3[0]?.wpm || 154);
-
-  const statsConfig = {
-    today:   { typists: '2,480',  countries: '42+', tests: '28.4K+', highest: maxWpm },
-    week:    { typists: '6,120',  countries: '68+', tests: '184K+',  highest: maxWpm },
-    month:   { typists: '8,950',  countries: '79+', tests: '640K+',  highest: maxWpm },
-    allTime: { typists: '10,248', countries: '85+', tests: '1.2M+',  highest: maxWpm },
-  };
-  const activeStats = statsConfig[period] || statsConfig.allTime;
+  const yourEntry = rows.find((r) => r.isCurrentUser || r.isYou);
+  const totalTypistsCount = rows.length;
+  const uniqueLocationsCount = new Set(rows.map((r) => r.location).filter((loc) => loc && loc !== 'Unknown')).size || (rows.length > 0 ? 1 : 0);
+  const totalTestsCount = rows.reduce((sum, r) => sum + (Number(r.tests) || 1), 0);
+  const highestScore = rows.length > 0 ? Math.max(...rows.map((r) => Number(r.wpm) || 0)) : 0;
 
   return (
     <div className="min-h-full bg-background text-foreground">
@@ -820,7 +548,9 @@ export const Leaderboard = () => {
                   </svg>
                 </div>
                 <div className="text-left leading-none">
-                  <p className="font-display text-xs font-bold text-foreground leading-tight">1.2M+</p>
+                  <p className="font-display text-xs font-bold text-foreground leading-tight">
+                    {publicStats?.testsCompleted ? `${publicStats.testsCompleted.toLocaleString()}+` : (totalTestsCount > 0 ? `${totalTestsCount.toLocaleString()}+` : '0')}
+                  </p>
                   <p className="text-[9px] text-muted-foreground leading-tight mt-0.5">Tests Completed</p>
                 </div>
               </div>
@@ -911,7 +641,7 @@ export const Leaderboard = () => {
             {/* ── TOP 3 PODIUM (Width equals the table below it) ── */}
             {loading ? (
               <PodiumSkeleton />
-            ) : (
+            ) : rows.length > 0 ? (
               <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3 items-end pt-2" aria-label="Top 3 typists">
                 {/* 2nd place (left) */}
                 <div className="order-2 sm:order-1">
@@ -926,7 +656,7 @@ export const Leaderboard = () => {
                   <PodiumCard entry={displayTop3[2]} position={3} />
                 </div>
               </div>
-            )}
+            ) : null}
 
             {/* TABLE CARD */}
             <div className="card-glass rounded-2xl overflow-hidden shadow-sm flex-1 flex flex-col justify-between">
@@ -961,7 +691,7 @@ export const Leaderboard = () => {
                     {search ? `No typists found matching "${search}"` : 'No scores recorded yet'}
                   </p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {search ? 'Try searching for a different username or country.' : 'Be the first to take the test and claim the top spot!'}
+                    {search ? 'Try searching for a different username or location.' : 'Be the first to take the test and claim the top spot!'}
                   </p>
                 </div>
                 {search ? (
@@ -1014,7 +744,7 @@ export const Leaderboard = () => {
                             <TrendingUp size={11} className={sortField === 'tests' ? 'text-primary' : 'opacity-60'} />
                           </span>
                         </th>
-                        <th className="w-[19%] px-3.5 py-2.5 sm:py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Country</th>
+                        <th className="w-[19%] px-3.5 py-2.5 sm:py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Location</th>
                         <th className="w-[16%] px-3.5 py-2.5 sm:py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Last Active</th>
                       </tr>
                     </thead>
@@ -1023,7 +753,7 @@ export const Leaderboard = () => {
                         <tr
                           key={`${period}-${duration}-${row.rank}-${row.username}`}
                           className={`ldb-row transition-colors ${
-                            row.isYou
+                            row.isCurrentUser || row.isYou
                               ? 'bg-primary/10 border-l-2 border-l-primary'
                               : 'hover:bg-accent/30'
                           }`}
@@ -1046,9 +776,9 @@ export const Leaderboard = () => {
                                 textClassName="text-xs font-semibold"
                               />
                               <span className="min-w-0 truncate">
-                                <p className={`font-semibold text-xs sm:text-sm truncate leading-tight ${row.isYou ? 'text-primary' : 'text-foreground'}`}>
+                                <p className={`font-semibold text-xs sm:text-sm truncate leading-tight ${row.isCurrentUser || row.isYou ? 'text-primary' : 'text-foreground'}`}>
                                   {row.name || row.username}
-                                  {row.isYou && (
+                                  {(row.isCurrentUser || row.isYou) && (
                                     <span className="ml-1.5 inline-flex items-center rounded bg-primary/20 px-1.5 py-0.5 text-[10px] font-bold text-primary">
                                       YOU
                                     </span>
@@ -1077,16 +807,16 @@ export const Leaderboard = () => {
                           {/* Country */}
                           <td className="px-3.5 py-2.5 hidden md:table-cell">
                             <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground truncate max-w-full">
-                              <span className="text-xs leading-none shrink-0" role="img" aria-label={row.country || 'Global'}>
-                                {row.flag || '🌐'}
+                              <span className="text-xs leading-none shrink-0" role="img" aria-label={row.location || 'Global'}>
+                                🌐
                               </span>
-                              <span className="truncate">{row.country || 'Global'}</span>
+                              <span className="truncate">{row.location || 'Unknown'}</span>
                             </span>
                           </td>
 
                           {/* Last Active */}
                           <td className="px-3.5 py-2.5 text-xs text-muted-foreground hidden md:table-cell truncate">
-                            {row.date || formatRelativeTime(row.createdAt || row.updatedAt)}
+                            {row.date || formatRelativeTime(row.rawDate)}
                           </td>
                         </tr>
                       ))}
@@ -1097,7 +827,7 @@ export const Leaderboard = () => {
                 {/* Pagination pinned flush to bottom */}
                 <div className="mt-auto flex flex-col sm:flex-row items-center justify-between gap-2.5 border-t border-border/70 px-4 py-2.5 sm:py-3 select-none bg-background/40">
                   <p className="text-xs text-muted-foreground">
-                    Showing top {Math.min(paginatedRows.length, pageSize)} of {filteredRows.length > 0 ? (filteredRows.length >= 20 ? '10,248' : filteredRows.length) : '0'} typists
+                    Showing top {Math.min(paginatedRows.length, pageSize)} of {filteredRows.length} typists
                   </p>
                   <div className="flex items-center gap-1">
                     <button
@@ -1160,21 +890,11 @@ export const Leaderboard = () => {
                 {yourEntry ? (
                   <div className="flex items-center gap-1.5">
                     <span className="font-display text-xl font-black text-primary">#{yourEntry.rank}</span>
-                    <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-emerald-400">
-                      ↑ 12
-                    </span>
                   </div>
-                ) : user ? (
+                ) : (
                   <span className="text-xs font-semibold text-muted-foreground bg-muted/40 px-2 py-0.5 rounded-md">
                     Unranked
                   </span>
-                ) : (
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-display text-xl font-black text-primary">#47</span>
-                    <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-emerald-400">
-                      ↑ 12
-                    </span>
-                  </div>
                 )}
               </div>
 
@@ -1223,40 +943,36 @@ export const Leaderboard = () => {
               ) : (
                 <div>
                   <div className="flex items-center gap-3">
-                    <UserAvatar
-                      src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80"
-                      name="Aman Gupta"
-                      username="aman_typist"
-                      className="h-11 w-11 rounded-full ring-2 ring-primary/40 shrink-0"
-                      textClassName="text-sm font-bold"
-                    />
+                    <div className="h-11 w-11 rounded-full bg-muted/60 ring-2 ring-border/50 grid place-items-center text-muted-foreground shrink-0">
+                      <Users size={20} />
+                    </div>
                     <div className="min-w-0">
                       <p className="font-bold text-sm text-foreground truncate leading-tight">
-                        Aman Gupta
+                        Guest Typist
                       </p>
                       <p className="text-xs text-muted-foreground truncate">
-                        @aman_typist
+                        Sign in to track rank
                       </p>
                     </div>
                   </div>
 
-                  {/* 3 Stats Row (Mockup showcase values) */}
+                  {/* 3 Stats Row */}
                   <div className="mt-3.5 grid grid-cols-3 gap-2 text-center pt-3 border-t border-border/50">
                     <div className="rounded-xl border border-border/60 bg-background/60 py-1.5">
-                      <p className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
-                        82
+                      <p className="font-display text-sm sm:text-base font-bold text-muted-foreground leading-tight">
+                        —
                       </p>
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wide">WPM</p>
                     </div>
                     <div className="rounded-xl border border-border/60 bg-background/60 py-1.5">
-                      <p className="font-display text-sm sm:text-base font-bold text-emerald-400 leading-tight">
-                        96.2%
+                      <p className="font-display text-sm sm:text-base font-bold text-muted-foreground leading-tight">
+                        —
                       </p>
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Accuracy</p>
                     </div>
                     <div className="rounded-xl border border-border/60 bg-background/60 py-1.5">
-                      <p className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
-                        28
+                      <p className="font-display text-sm sm:text-base font-bold text-muted-foreground leading-tight">
+                        —
                       </p>
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Tests</p>
                     </div>
@@ -1273,7 +989,7 @@ export const Leaderboard = () => {
               </Link>
             </div>
 
-            {/* CARD 2 — LEADERBOARD STATS (4 stats matching Figma mockup) */}
+            {/* CARD 2 — LEADERBOARD STATS */}
             <div className="ldb-card card-glass group rounded-2xl p-4 sm:p-4.5 shadow-sm border border-border/80 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/50 hover:shadow-[0_12px_28px_-6px_rgba(16,185,129,0.25)] hover:bg-gradient-to-b hover:from-emerald-500/[0.05] hover:to-transparent cursor-default">
               <h2 className="font-display text-sm sm:text-base font-bold text-foreground group-hover:text-emerald-300 transition-colors mb-3">
                 Leaderboard Stats
@@ -1286,22 +1002,22 @@ export const Leaderboard = () => {
                   </div>
                   <div className="min-w-0">
                     <p className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
-                      {activeStats.typists}
+                      {totalTypistsCount.toLocaleString()}
                     </p>
                     <p className="text-[11px] text-muted-foreground">Total Typists</p>
                   </div>
                 </div>
 
-                {/* Countries */}
+                {/* Countries / Locations */}
                 <div className="flex items-center gap-3">
                   <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-cyan-500/10 text-cyan-400">
                     <Globe2 size={16} />
                   </div>
                   <div className="min-w-0">
                     <p className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
-                      {activeStats.countries || '85+'}
+                      {uniqueLocationsCount}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">Countries</p>
+                    <p className="text-[11px] text-muted-foreground">Locations</p>
                   </div>
                 </div>
 
@@ -1312,7 +1028,7 @@ export const Leaderboard = () => {
                   </div>
                   <div className="min-w-0">
                     <p className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
-                      {activeStats.tests}
+                      {totalTestsCount.toLocaleString()}
                     </p>
                     <p className="text-[11px] text-muted-foreground">Tests Completed</p>
                   </div>
@@ -1325,7 +1041,7 @@ export const Leaderboard = () => {
                   </div>
                   <div className="min-w-0">
                     <p className="font-display text-sm sm:text-base font-bold text-foreground leading-tight">
-                      {activeStats.highest} WPM
+                      {highestScore > 0 ? `${highestScore} WPM` : '0 WPM'}
                     </p>
                     <p className="text-[11px] text-muted-foreground">Highest Score</p>
                   </div>

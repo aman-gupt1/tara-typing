@@ -5,6 +5,7 @@ import {
   Volume2, VolumeX, Eye, Check, Keyboard as KeyboardIcon,
   Sparkles, RefreshCw, AlertCircle, CheckSquare,
   TrendingUp, Lightbulb, Settings as SettingsIcon,
+  Minus, Plus, X,
 } from 'lucide-react';
 import SEO from '../components/common/SEO';
 import Keyboard from '../components/typing/Keyboard';
@@ -20,7 +21,13 @@ import { soundEngine } from '../utils/soundEngine';
 import { getRandomWords, commonWords } from '../data/words';
 import { getRandomQuote } from '../data/quotes';
 
-const durations = [15, 30, 60, 120];
+const DURATION_OPTIONS = [
+  { id: '30s', label: '30s', seconds: 30 },
+  { id: '1m',  label: '1m',  seconds: 60,  minutes: 1 },
+  { id: '2m',  label: '2m',  seconds: 120, minutes: 2 },
+  { id: '5m',  label: '5m',  seconds: 300, minutes: 5 },
+  { id: 'custom', label: 'Custom' },
+];
 
 const modes = [
   { id: 'words',  label: 'Words'  },
@@ -40,6 +47,7 @@ const wordCountByDuration = {
   30: 90,
   60: 160,
   120: 300,
+  300: 600,
 };
 
 const CODE_SNIPPETS = [
@@ -96,7 +104,8 @@ function getTextForMode(mode, duration, difficulty = 'easy', customText = '') {
   } else if (mode === 'custom' && customText) {
     rawText = customText;
   } else {
-    const count = wordCountByDuration[duration] || 50;
+    const minutes = Math.max(1, Math.ceil(duration / 60));
+    const count = wordCountByDuration[duration] || Math.max(150, minutes * 150);
 
     if (difficulty === 'easy') {
       const shuffled = [...EASY_WORDS].sort(() => 0.5 - Math.random());
@@ -136,7 +145,30 @@ export const TypingTest = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const [duration, setDuration]     = useState(testConfig.duration || 30);
+  const [duration, setDuration] = useState(() => {
+    if (testConfig?.isDailyChallenge && testConfig?.duration) return testConfig.duration;
+    return 30; // Fresh load MUST default to 30s
+  });
+  const [durationMinutes, setDurationMinutes] = useState(() => {
+    if (testConfig?.isDailyChallenge && testConfig?.duration && testConfig.duration >= 60) {
+      return Math.max(1, Math.min(30, Math.round(testConfig.duration / 60)));
+    }
+    return 1;
+  });
+  const [isCustomDuration, setIsCustomDuration] = useState(() => {
+    if (testConfig?.isDailyChallenge && testConfig?.duration) {
+      return !DURATION_OPTIONS.some((p) => p.seconds === testConfig.duration && p.id !== 'custom');
+    }
+    return false;
+  });
+  const [isCustomControlsOpen, setIsCustomControlsOpen] = useState(false);
+  const [activePreset, setActivePreset] = useState(() => {
+    if (testConfig?.isDailyChallenge && testConfig?.duration) {
+      const match = DURATION_OPTIONS.find((p) => p.seconds === testConfig.duration && p.id !== 'custom');
+      return match ? match.id : 'custom';
+    }
+    return '30s'; // Fresh load MUST default to 30s
+  });
   const [mode, setMode]             = useState(testConfig.mode || 'words');
   const [difficulty, setDifficulty] = useState('easy');
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
@@ -467,12 +499,29 @@ export const TypingTest = () => {
   // Sync testConfig changes (e.g. from Daily Challenge or Custom Test)
   useEffect(() => {
     if (testConfig?.isDailyChallenge && testConfig?.customText) {
-      const d = testConfig.duration || 60;
-      setDuration(d);
+      const dSec = testConfig.duration || 60;
+      setDuration(dSec);
+      const dMin = Math.max(1, Math.min(30, Math.round(dSec / 60))) || 1;
+      setDurationMinutes(dMin);
+      const match = DURATION_OPTIONS.find((p) => p.seconds === dSec && p.id !== 'custom');
+      if (match) {
+        setActivePreset(match.id);
+        setIsCustomDuration(false);
+      } else {
+        setActivePreset('custom');
+        setIsCustomDuration(true);
+      }
       setMode('custom');
-      restart(d, 'custom', difficulty, testConfig.customText);
+      restart(dSec, 'custom', difficulty, testConfig.customText);
     }
   }, [testConfig?.isDailyChallenge, testConfig?.challengeId, testConfig?.customText]);
+
+  // Auto-hide custom duration slider controls once typing starts
+  useEffect(() => {
+    if (started) {
+      setIsCustomControlsOpen(false);
+    }
+  }, [started]);
 
   // Handle keystrokes with synchronous refs & pure 1-to-1 character matching
   const handleKeyDown = (e) => {
@@ -549,6 +598,7 @@ export const TypingTest = () => {
     if (!startedRef.current) {
       startedRef.current = true;
       setStarted(true);
+      setIsCustomControlsOpen(false);
       startTimeRef.current = Date.now();
     }
 
@@ -582,10 +632,66 @@ export const TypingTest = () => {
     }
   };
 
+  const handleDurationOptionClick = (opt) => {
+    if (opt.id === 'custom') {
+      if (isCustomDuration) {
+        setIsCustomControlsOpen((prev) => !prev);
+      } else {
+        setIsCustomDuration(true);
+        setIsCustomControlsOpen(true);
+        setActivePreset('custom');
+        const inSeconds = durationMinutes * 60;
+        setDuration(inSeconds);
+        setTestConfig((prev) => ({ ...prev, duration: inSeconds }));
+        restart(inSeconds, mode, difficulty);
+      }
+      return;
+    }
+
+    setIsCustomDuration(false);
+    setIsCustomControlsOpen(false);
+    setActivePreset(opt.id);
+    setDuration(opt.seconds);
+    if (opt.minutes) {
+      setDurationMinutes(opt.minutes);
+    }
+    setTestConfig((prev) => ({ ...prev, duration: opt.seconds }));
+    restart(opt.seconds, mode, difficulty);
+  };
+
+  const handleCustomSliderChange = (newMinutes) => {
+    const clamped = Math.max(1, Math.min(30, Number(newMinutes)));
+    setDurationMinutes(clamped);
+    const inSeconds = clamped * 60;
+    setDuration(inSeconds);
+    setIsCustomDuration(true);
+    setActivePreset('custom');
+    setTestConfig((prev) => ({ ...prev, duration: inSeconds }));
+    restart(inSeconds, mode, difficulty);
+  };
+
+  const handleCustomStep = (delta) => {
+    const next = Math.max(1, Math.min(30, durationMinutes + delta));
+    handleCustomSliderChange(next);
+  };
+
   const handleDurationChange = (d) => {
-    setDuration(d);
-    setTestConfig((prev) => ({ ...prev, duration: d }));
-    restart(d, mode, difficulty);
+    const match = DURATION_OPTIONS.find((p) => p.seconds === d);
+    if (match) {
+      handleDurationOptionClick(match);
+    } else {
+      const mins = Math.max(1, Math.min(30, Math.round(d / 60))) || 1;
+      handleCustomSliderChange(mins);
+    }
+  };
+
+  const formatTimeLeft = (sec) => {
+    if (sec >= 60) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return s > 0 ? `${m}m ${s}s` : `${m}m`;
+    }
+    return `${sec}s`;
   };
 
   const handleModeChange = (m) => {
@@ -742,49 +848,22 @@ export const TypingTest = () => {
         {/* ── TEST CONTROL BAR (Figma Mockup) ── */}
         <div className="mt-7 card-glass rounded-2xl p-3 sm:p-4 border border-[#1E293B] bg-[#111827] transition-all duration-300 hover:border-primary/40 hover:shadow-[0_8px_30px_-6px_rgba(59,130,246,0.15)]">
           <div className="flex flex-wrap items-center justify-between gap-3.5">
-            {/* Left Controls: Duration + Text Type + Difficulty */}
+            {/* Left Controls: Text Type + Difficulty */}
             <div className="flex flex-wrap items-center gap-3 sm:gap-4">
 
-              {/* SECTION 1: TEST DURATION */}
-              <div>
-                <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                  Test Duration
-                </p>
-                <div className="flex items-center gap-1 rounded-xl border border-border bg-[#0B1120] p-1">
-                  {durations.map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => handleDurationChange(d)}
-                      aria-pressed={duration === d}
-                      className={`rounded-lg px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-all select-none ${
-                        duration === d
-                          ? 'bg-primary text-white font-semibold shadow-sm shadow-primary/30'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-slate-800/60'
-                      }`}
-                    >
-                      {d}s
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Subtle vertical divider */}
-              <div className="hidden md:block h-10 w-px bg-border/60" />
-
-              {/* SECTION 2: TEXT TYPE */}
+              {/* SECTION 1: TEXT TYPE */}
               <div>
                 <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                   Text Type
                 </p>
-                <div className="flex items-center gap-1 rounded-xl border border-border bg-[#0B1120] p-1">
+                <div className="flex items-center gap-1 rounded-xl border border-border bg-[#0B1120] p-1 sm:p-1.5 h-10">
                   {modes.map((m) => (
                     <button
                       key={m.id}
                       type="button"
                       onClick={() => handleModeChange(m.id)}
                       aria-pressed={mode === m.id}
-                      className={`rounded-lg px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-all select-none ${
+                      className={`rounded-lg px-3.5 py-1 text-xs sm:text-sm font-medium transition-all select-none ${
                         mode === m.id
                           ? 'bg-primary text-white font-semibold shadow-sm shadow-primary/30'
                           : 'text-muted-foreground hover:text-foreground hover:bg-slate-800/60'
@@ -797,21 +876,21 @@ export const TypingTest = () => {
               </div>
 
               {/* Subtle vertical divider */}
-              <div className="hidden lg:block h-10 w-px bg-border/60" />
+              <div className="hidden md:block h-10 w-px bg-border/60" />
 
-              {/* SECTION 3: DIFFICULTY */}
+              {/* SECTION 2: DIFFICULTY */}
               <div>
                 <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                   Difficulty
                 </p>
-                <div className="flex items-center gap-1 rounded-xl border border-border bg-[#0B1120] p-1">
+                <div className="flex items-center gap-1 rounded-xl border border-border bg-[#0B1120] p-1 sm:p-1.5 h-10">
                   {difficulties.map((diff) => (
                     <button
                       key={diff.id}
                       type="button"
                       onClick={() => handleDifficultyChange(diff.id)}
                       aria-pressed={difficulty === diff.id}
-                      className={`rounded-lg px-3.5 py-1.5 text-xs sm:text-sm font-medium transition-all select-none ${
+                      className={`rounded-lg px-3.5 py-1 text-xs sm:text-sm font-medium transition-all select-none ${
                         difficulty === diff.id
                           ? 'bg-primary text-white font-semibold shadow-sm shadow-primary/30'
                           : 'text-muted-foreground hover:text-foreground hover:bg-slate-800/60'
@@ -822,6 +901,92 @@ export const TypingTest = () => {
                   ))}
                 </div>
               </div>
+              {/* Subtle vertical divider */}
+              <div className="hidden lg:block h-10 w-px bg-border/60" />
+
+              {/* SECTION 3: DURATION */}
+              <div>
+                <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  Duration
+                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Duration Toggle: 30s | 1m | 2m | 5m | Custom */}
+                  <div className="flex items-center gap-1 rounded-xl border border-border bg-[#0B1120] p-1 sm:p-1.5 h-10">
+                    {DURATION_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => handleDurationOptionClick(opt)}
+                        aria-pressed={activePreset === opt.id}
+                        className={`rounded-lg px-2.5 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-all select-none min-w-[36px] text-center ${
+                          activePreset === opt.id
+                            ? 'bg-primary text-white font-semibold shadow-sm shadow-primary/30'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-slate-800/60'
+                        }`}
+                      >
+                        {opt.id === 'custom' ? (isCustomDuration ? `${durationMinutes}m` : 'Custom') : opt.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Expanded Custom Duration Controls (when Custom is selected and controls are open) */}
+                  {isCustomDuration && isCustomControlsOpen && (
+                    <div className="flex items-center gap-2 rounded-xl border border-primary/50 bg-[#0B1120] px-3 py-1 h-10 select-none animate-in fade-in zoom-in-95 duration-150">
+                      <button
+                        type="button"
+                        onClick={() => handleCustomStep(-1)}
+                        disabled={durationMinutes <= 1}
+                        className="w-6 h-6 flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 hover:border-primary/60 hover:text-primary text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all select-none"
+                        aria-label="Decrease duration by 1 minute"
+                      >
+                        <Minus size={13} strokeWidth={2.5} />
+                      </button>
+                      <span className="text-xs font-semibold text-slate-200 font-mono select-none">1m</span>
+                      <input
+                        type="range"
+                        min="1"
+                        max="30"
+                        step="1"
+                        value={durationMinutes}
+                        onChange={(e) => handleCustomSliderChange(Number(e.target.value))}
+                        aria-label="Custom Duration (1 to 30 minutes)"
+                        className="duration-range-slider w-20 sm:w-28 h-1.5 rounded-lg appearance-none cursor-pointer focus:outline-none"
+                        style={{
+                          background: `linear-gradient(to right, var(--primary) 0%, var(--primary) ${((durationMinutes - 1) / 29) * 100}%, #334155 ${((durationMinutes - 1) / 29) * 100}%, #334155 100%)`,
+                        }}
+                      />
+                      <span className="text-xs font-semibold text-slate-200 font-mono select-none">30m</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCustomStep(1)}
+                        disabled={durationMinutes >= 30}
+                        className="w-6 h-6 flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 hover:border-primary/60 hover:text-primary text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all select-none"
+                        aria-label="Increase duration by 1 minute"
+                      >
+                        <Plus size={13} strokeWidth={2.5} />
+                      </button>
+                      <div className="h-4 w-px bg-slate-700/80 mx-0.5" />
+                      <div className="relative group/close flex items-center">
+                        <button
+                          type="button"
+                          onClick={() => setIsCustomControlsOpen(false)}
+                          className="w-6 h-6 flex items-center justify-center rounded-lg text-muted-foreground hover:text-white hover:bg-slate-800 transition-colors"
+                          aria-label="Close / Hide custom duration"
+                        >
+                          <X size={13} strokeWidth={2.5} />
+                        </button>
+                        {/* Tooltip positioned on top of the button */}
+                        <div className="absolute bottom-full right-0 mb-2 flex flex-col items-end opacity-0 invisible group-hover/close:opacity-100 group-hover/close:visible transition-all duration-150 pointer-events-none z-30">
+                          <div className="px-2 py-0.5 text-[10px] font-medium text-slate-200 bg-slate-800 border border-slate-700 rounded shadow-md whitespace-nowrap select-none">
+                            Close / Hide
+                          </div>
+                          <div className="w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-slate-800 mr-2 -mt-px" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Right: New Test Button */}
@@ -829,7 +994,7 @@ export const TypingTest = () => {
               type="button"
               onClick={() => restart(duration, mode, difficulty)}
               aria-label="Generate new test"
-              className="mt-auto flex items-center gap-2 rounded-xl border border-border bg-[#0B1120] hover:border-primary/60 hover:text-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-foreground transition-all shadow-sm select-none"
+              className="flex items-center gap-2 rounded-xl border border-border bg-[#0B1120] hover:border-primary/60 hover:text-white px-4 py-2 text-xs sm:text-sm font-semibold text-foreground transition-all shadow-sm select-none h-10 self-end"
             >
               <RotateCcw size={15} />
               <span>New Test</span>
@@ -1018,7 +1183,7 @@ export const TypingTest = () => {
                   <div className="min-w-0">
                     <p className="text-[11px] text-muted-foreground leading-none">Time Left</p>
                     <p className="mt-1 font-display text-lg sm:text-xl font-bold text-foreground leading-tight">
-                      {timeLeft}s
+                      {formatTimeLeft(timeLeft)}
                     </p>
                   </div>
                 </div>

@@ -15,7 +15,7 @@ export const getLeaderboard = async (
   try {
     const {
       period = 'allTime',
-      duration = 30,
+      duration = 'all',
     } = req.query;
 
     const results =
@@ -39,6 +39,8 @@ export const getLeaderboard = async (
         avatar:
           item.user?.avatar ||
           'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+
+          location: item.user?.location || 'Unknown',
 
         wpm: item.wpm,
 

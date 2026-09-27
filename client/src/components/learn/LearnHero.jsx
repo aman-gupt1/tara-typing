@@ -3,7 +3,13 @@ import { Sparkles, GraduationCap, Play, Compass, CheckCircle2 } from 'lucide-rea
 import { useLearn } from '../../context/LearnContext';
 
 export const LearnHero = ({ onScrollToLessons }) => {
-  const { completedCount, totalLessons, recommendedLesson } = useLearn();
+  const { completedCount, totalLessons, recommendedLesson, lessons } = useLearn();
+
+  const startTarget = recommendedLesson
+    ? `/learn/lesson/${recommendedLesson.slug || recommendedLesson.id}`
+    : lessons && lessons.length > 0
+    ? `/learn/lesson/${lessons[0].slug || lessons[0].id}`
+    : '/learn';
 
   return (
     <section className="relative overflow-hidden py-6 sm:py-10 text-center sm:text-left">
@@ -27,7 +33,7 @@ export const LearnHero = ({ onScrollToLessons }) => {
 
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-2">
             <Link
-              to={recommendedLesson ? `/learn/lesson/${recommendedLesson.id}` : '/learn/lesson/what-is-touch-typing'}
+              to={startTarget}
               className="bg-gradient-primary glow-primary flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.02] select-none"
             >
               <Play size={16} />
@@ -47,7 +53,7 @@ export const LearnHero = ({ onScrollToLessons }) => {
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-5 pt-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <CheckCircle2 size={14} className="text-success" />
-              <span>18 Structured Lessons</span>
+              <span>{totalLessons > 0 ? `${totalLessons} Structured Lessons` : 'Structured Lessons'}</span>
             </span>
             <span className="flex items-center gap-1.5">
               <CheckCircle2 size={14} className="text-success" />

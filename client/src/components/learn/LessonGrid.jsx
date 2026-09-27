@@ -1,18 +1,36 @@
 import { useState, useMemo } from 'react';
-import { Search, Filter, Layers, CheckCircle2, BookmarkCheck, BookOpen } from 'lucide-react';
-import { LESSON_CATEGORIES, TYPING_LESSONS } from '../../data/typingLessons';
+import { Search, BookOpen, AlertCircle } from 'lucide-react';
 import LessonCard from './LessonCard';
 import { useLearn } from '../../context/LearnContext';
 
+function LessonCardSkeleton() {
+  return (
+    <div className="card-glass flex flex-col justify-between rounded-2xl p-5 sm:p-6 shadow-lg border border-border/80 animate-pulse">
+      <div>
+        <div className="flex items-center justify-between gap-2">
+          <div className="h-5 w-20 bg-muted/60 rounded-md" />
+          <div className="h-5 w-16 bg-muted/60 rounded-full" />
+        </div>
+        <div className="h-6 w-3/4 bg-muted/60 rounded-md mt-4" />
+        <div className="h-3.5 w-full bg-muted/40 rounded-md mt-2" />
+        <div className="h-3.5 w-2/3 bg-muted/40 rounded-md mt-1.5" />
+      </div>
+      <div className="mt-6 pt-4 border-t border-border/60 flex items-center justify-between">
+        <div className="h-4 w-14 bg-muted/50 rounded-md" />
+        <div className="h-7 w-20 bg-muted/60 rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
 export const LessonGrid = () => {
-  const { lessons: contextLessons, isCompleted, isBookmarked } = useLearn();
-  const lessons = contextLessons && contextLessons.length > 0 ? contextLessons : TYPING_LESSONS;
+  const { lessons, categories, loading, error, isCompleted, isBookmarked, refreshLessons } = useLearn();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedFilter, setSelectedFilter] = useState('all'); // all | beginner | intermediate | advanced | completed | saved
 
   const filteredLessons = useMemo(() => {
-    return lessons.filter((lesson) => {
+    return (lessons || []).filter((lesson) => {
       // Category match
       if (selectedCategory !== 'all' && lesson.categoryId !== selectedCategory) {
         return false;
@@ -22,22 +40,22 @@ export const LessonGrid = () => {
       if (selectedFilter === 'beginner' && lesson.difficulty !== 'Beginner') return false;
       if (selectedFilter === 'intermediate' && lesson.difficulty !== 'Intermediate') return false;
       if (selectedFilter === 'advanced' && lesson.difficulty !== 'Advanced') return false;
-      if (selectedFilter === 'completed' && !isCompleted(lesson.id)) return false;
-      if (selectedFilter === 'saved' && !isBookmarked(lesson.id)) return false;
+      if (selectedFilter === 'completed' && !isCompleted(lesson.slug || lesson.id)) return false;
+      if (selectedFilter === 'saved' && !isBookmarked(lesson.slug || lesson.id)) return false;
 
       // Search match
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const matchesTitle = lesson.title.toLowerCase().includes(q);
+        const matchesTitle = (lesson.title || '').toLowerCase().includes(q);
         const matchesSubtitle = (lesson.subtitle || '').toLowerCase().includes(q);
-        const matchesDesc = lesson.description.toLowerCase().includes(q);
-        const matchesCat = lesson.category.toLowerCase().includes(q);
+        const matchesDesc = (lesson.description || '').toLowerCase().includes(q);
+        const matchesCat = (lesson.category || '').toLowerCase().includes(q);
         return matchesTitle || matchesSubtitle || matchesDesc || matchesCat;
       }
 
       return true;
     });
-  }, [searchQuery, selectedCategory, selectedFilter, isCompleted, isBookmarked]);
+  }, [lessons, searchQuery, selectedCategory, selectedFilter, isCompleted, isBookmarked]);
 
   return (
     <div className="space-y-6" id="all-lessons-section">
@@ -103,11 +121,11 @@ export const LessonGrid = () => {
                 : 'text-muted-foreground hover:text-foreground hover:bg-accent'
             }`}
           >
-            All Categories ({TYPING_LESSONS.length})
+            All Categories ({lessons.length})
           </button>
 
-          {LESSON_CATEGORIES.map((cat) => {
-            const count = TYPING_LESSONS.filter((l) => l.categoryId === cat.id).length;
+          {categories.map((cat) => {
+            const count = lessons.filter((l) => l.categoryId === cat.id).length;
             return (
               <button
                 key={cat.id}
@@ -127,11 +145,32 @@ export const LessonGrid = () => {
       </div>
 
       {/* Lesson Cards Grid */}
-      {filteredLessons.length > 0 ? (
+      {loading ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <LessonCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="card-glass rounded-2xl p-12 text-center space-y-3 border border-destructive/30">
+          <AlertCircle className="mx-auto text-destructive" size={32} />
+          <h3 className="font-display text-lg font-bold text-foreground">Failed to load lessons</h3>
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+            {error || 'Unable to connect to the learning service.'}
+          </p>
+          <button
+            type="button"
+            onClick={refreshLessons}
+            className="mt-2 inline-flex rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white hover:opacity-90"
+          >
+            Try Again
+          </button>
+        </div>
+      ) : filteredLessons.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredLessons.map((lesson, idx) => (
             <div
-              key={lesson.id}
+              key={lesson.slug || lesson.id}
               className={idx < 6 ? `animate-page-enter stagger-${Math.min(idx, 4)}` : ''}
             >
               <LessonCard lesson={lesson} />
@@ -141,21 +180,29 @@ export const LessonGrid = () => {
       ) : (
         <div className="card-glass rounded-2xl p-12 text-center space-y-3">
           <BookOpen className="mx-auto text-muted-foreground" size={32} />
-          <h3 className="font-display text-lg font-bold text-foreground">No lessons found</h3>
+          <h3 className="font-display text-lg font-bold text-foreground">
+            {searchQuery || selectedCategory !== 'all' || selectedFilter !== 'all'
+              ? 'No lessons found'
+              : 'No lessons available'}
+          </h3>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-            Try adjusting your search terms or filter selection to explore more topics.
+            {searchQuery || selectedCategory !== 'all' || selectedFilter !== 'all'
+              ? 'Try adjusting your search terms or filter selection to explore more topics.'
+              : 'Lessons are currently being prepared. Please check back shortly.'}
           </p>
-          <button
-            type="button"
-            onClick={() => {
-              setSearchQuery('');
-              setSelectedCategory('all');
-              setSelectedFilter('all');
-            }}
-            className="mt-2 inline-flex rounded-xl bg-accent px-4 py-2 text-xs font-semibold text-foreground hover:bg-accent/80"
-          >
-            Reset Filters
-          </button>
+          {(searchQuery || selectedCategory !== 'all' || selectedFilter !== 'all') && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedCategory('all');
+                setSelectedFilter('all');
+              }}
+              className="mt-2 inline-flex rounded-xl bg-accent px-4 py-2 text-xs font-semibold text-foreground hover:bg-accent/80"
+            >
+              Reset Filters
+            </button>
+          )}
         </div>
       )}
     </div>

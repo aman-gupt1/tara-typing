@@ -119,7 +119,7 @@ const lessonSchema = new mongoose.Schema(
 
     difficulty: {
       type: String,
-      enum: ['Beginner', 'Intermediate', 'Advanced'],
+      enum: ['Beginner', 'Intermediate', 'Advanced', 'Expert'],
       default: 'Beginner',
     },
 

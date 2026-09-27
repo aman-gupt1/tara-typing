@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { Github, Sparkles } from 'lucide-react';
+import { toast } from 'react-toastify';
 import SEO from '../components/common/SEO';
 import { useAuth } from '../context/AuthContext';
 
 export const Register = () => {
-  const { register, demoLogin, isAuthenticated, loading: authLoading } = useAuth();
+  const { register, isAuthenticated, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -27,8 +27,11 @@ export const Register = () => {
     ? rawFrom
     : '/profile';
 
-  // If already authenticated, redirect to destination or profile
+  // If already authenticated, redirect to destination or profile/admin
   if (isAuthenticated) {
+    if (user?.role === 'admin' && !rawFrom) {
+      return <Navigate to="/admin" replace />;
+    }
     return <Navigate to={from} replace />;
   }
 
@@ -65,15 +68,6 @@ export const Register = () => {
     }
   };
 
-  const handleDemo = async () => {
-    try {
-      await demoLogin();
-      navigate(from, { replace: true });
-    } catch {
-      // Handled in AuthContext
-    }
-  };
-
   const renderField = (id, label, type, fieldKey, placeholder) => (
     <div>
       <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-foreground">
@@ -85,38 +79,30 @@ export const Register = () => {
         value={formData[fieldKey]}
         onChange={(e) => setFormData({ ...formData, [fieldKey]: e.target.value })}
         placeholder={placeholder}
-        aria-invalid={!!errors[fieldKey]}
         className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-ring transition-colors"
       />
-      {errors[fieldKey] && (
-        <p role="alert" className="mt-1 text-xs text-destructive">
-          {errors[fieldKey]}
-        </p>
-      )}
+      {errors[fieldKey] && <p className="mt-1 text-xs text-destructive">{errors[fieldKey]}</p>}
     </div>
   );
 
   return (
     <div className="flex w-full flex-1 flex-col bg-background text-foreground transition-colors duration-200">
       <SEO
-        title="Register — Tara Typing"
-        description="Create your Tara Typing account to track your progress and compete on the global leaderboard."
+        title="Sign Up — Tara Typing"
+        description="Create your Tara Typing account to save test scores, track speed analytics and climb leaderboards."
       />
 
       <main className="flex flex-1 items-center justify-center px-4 py-12">
         <div className="card-glass w-full max-w-md p-8 shadow-2xl border border-border/60 hover:border-primary/50 hover:shadow-[0_16px_36px_-8px_rgba(59,130,246,0.2)] transition-all duration-300">
-          <div className="flex items-center gap-2">
-            <h1 className="font-display text-2xl font-bold text-foreground">Create Account</h1>
-            <Sparkles size={18} className="text-pink" aria-hidden="true" />
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">Join Tara Typing today!</p>
+          <h1 className="font-display text-2xl font-bold text-foreground">Create Account</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Join the Tara Typing community</p>
 
           <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4" noValidate>
-            {renderField('reg-name', 'Full Name', 'text', 'name', 'Enter your full name')}
-            {renderField('reg-username', 'Username', 'text', 'username', 'Choose a username')}
-            {renderField('reg-email', 'Email', 'email', 'email', 'Enter your email')}
-            {renderField('reg-password', 'Password', 'password', 'password', 'Create a password')}
-            {renderField('reg-confirm', 'Confirm Password', 'password', 'confirm', 'Confirm your password')}
+            {renderField('reg-name', 'Full Name', 'text', 'name', 'e.g. John Doe')}
+            {renderField('reg-username', 'Username', 'text', 'username', 'e.g. jdoe')}
+            {renderField('reg-email', 'Email Address', 'email', 'email', 'name@example.com')}
+            {renderField('reg-password', 'Password', 'password', 'password', '••••••••')}
+            {renderField('reg-confirm', 'Confirm Password', 'password', 'confirm', '••••••••')}
 
             {errors.form && (
               <p role="alert" className="text-sm text-destructive">
@@ -133,26 +119,15 @@ export const Register = () => {
             </button>
           </form>
 
-          {/* 1-Click Demo Shortcut */}
-          <div className="mt-3">
-            <button
-              type="button"
-              onClick={handleDemo}
-              className="w-full flex items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 select-none"
-            >
-              <Sparkles size={16} /> Try as Demo User (1-Click)
-            </button>
-          </div>
-
           <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
             <span className="h-px flex-1 bg-border" /> or continue with <span className="h-px flex-1 bg-border" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div>
             <button
               type="button"
-              onClick={handleDemo}
-              className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card text-foreground px-4 py-2.5 text-sm font-medium hover:bg-accent transition-colors select-none"
+              onClick={() => toast.info('Google sign-up integration coming soon!')}
+              className="w-full flex items-center justify-center gap-2.5 rounded-xl border border-border bg-card text-foreground px-4 py-2.5 text-sm font-medium hover:bg-accent transition-colors select-none cursor-pointer"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
                 <path
@@ -172,14 +147,7 @@ export const Register = () => {
                   d="M12 23.2c3.06 0 5.63-1 7.5-2.74l-3.56-2.76c-.95.66-2.24 1.12-3.94 1.12-3 0-5.4-2.06-6.3-4.76L1.9 17c1.8 3.7 5.7 6.2 10.1 6.2z"
                 />
               </svg>
-              Google
-            </button>
-            <button
-              type="button"
-              onClick={handleDemo}
-              className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium hover:bg-accent select-none"
-            >
-              <Github size={16} aria-hidden="true" /> GitHub
+              <span>Sign up with Google</span>
             </button>
           </div>
 

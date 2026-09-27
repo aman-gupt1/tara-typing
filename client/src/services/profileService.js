@@ -24,13 +24,32 @@ export const profileService = {
    * PUT /api/profile/update
    */
   updateProfile: async (profileData) => {
-    const payload = {
-      name: profileData.name,
-      username: profileData.username,
-      avatar: profileData.avatar,
-      bio: profileData.bio,
-      location: profileData.location,
-    };
+    const hasAvatarFile = Boolean(profileData?.avatarFile);
+
+    let payload;
+
+    if (hasAvatarFile) {
+      const formData = new FormData();
+      formData.append('name', profileData.name || '');
+      formData.append('username', profileData.username || '');
+      formData.append('bio', profileData.bio || '');
+      formData.append('location', profileData.location || '');
+      formData.append('avatar', profileData.avatarFile);
+      payload = formData;
+    } else {
+      payload = {
+        name: profileData.name,
+        username: profileData.username,
+        bio: profileData.bio,
+        location: profileData.location,
+      };
+
+      if (profileData.avatar && !profileData.avatar.startsWith('data:')) {
+        payload.avatar = profileData.avatar;
+      } else if (profileData.avatar === '') {
+        payload.avatar = '';
+      }
+    }
 
     try {
       const res = await api.put('/profile/update', payload);

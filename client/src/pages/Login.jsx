@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { Eye, EyeOff, Github, Sparkles } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import { toast } from 'react-toastify';
 import SEO from '../components/common/SEO';
 import { useAuth } from '../context/AuthContext';
 
 export const Login = () => {
-  const { login, demoLogin, isAuthenticated, loading: authLoading } = useAuth();
+  const { login, isAuthenticated, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -25,8 +26,11 @@ export const Login = () => {
     ? rawFrom
     : '/profile';
 
-  // If already authenticated, redirect to destination or profile
+  // If already authenticated, redirect to destination or profile/admin
   if (isAuthenticated) {
+    if (user?.role === 'admin' && !rawFrom) {
+      return <Navigate to="/admin" replace />;
+    }
     return <Navigate to={from} replace />;
   }
 
@@ -39,21 +43,18 @@ export const Login = () => {
     setError('');
     setLoading(true);
     try {
-      await login(formData.id, formData.password);
-      navigate(from, { replace: true });
+      const loggedUser = await login(formData.id, formData.password);
+      if (rawFrom) {
+        navigate(from, { replace: true });
+      } else if (loggedUser?.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (err) {
       setError(err?.message || 'Invalid credentials.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDemo = async () => {
-    try {
-      await demoLogin();
-      navigate(from, { replace: true });
-    } catch {
-      // Handled in AuthContext
     }
   };
 
@@ -138,26 +139,15 @@ export const Login = () => {
             </button>
           </form>
 
-          {/* Quick Demo Sign In */}
-          <div className="mt-3">
-            <button
-              type="button"
-              onClick={handleDemo}
-              className="w-full flex items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20 select-none"
-            >
-              <Sparkles size={16} /> Try as Demo User (1-Click)
-            </button>
-          </div>
-
           <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
             <span className="h-px flex-1 bg-border" /> or continue with <span className="h-px flex-1 bg-border" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div>
             <button
               type="button"
-              onClick={handleDemo}
-              className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card text-foreground px-4 py-2.5 text-sm font-medium hover:bg-accent transition-colors select-none"
+              onClick={() => toast.info('Google sign-in integration coming soon!')}
+              className="w-full flex items-center justify-center gap-2.5 rounded-xl border border-border bg-card text-foreground px-4 py-2.5 text-sm font-medium hover:bg-accent transition-colors select-none cursor-pointer"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
                 <path
@@ -177,14 +167,7 @@ export const Login = () => {
                   d="M12 23.2c3.06 0 5.63-1 7.5-2.74l-3.56-2.76c-.95.66-2.24 1.12-3.94 1.12-3 0-5.4-2.06-6.3-4.76L1.9 17c1.8 3.7 5.7 6.2 10.1 6.2z"
                 />
               </svg>
-              Google
-            </button>
-            <button
-              type="button"
-              onClick={handleDemo}
-              className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card text-foreground px-4 py-2.5 text-sm font-medium hover:bg-accent transition-colors select-none"
-            >
-              <Github size={16} aria-hidden="true" /> GitHub
+              <span>Sign in with Google</span>
             </button>
           </div>
 

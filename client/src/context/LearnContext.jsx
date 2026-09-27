@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
-import { api } from '../services/api';
+import { learningService } from '../services/learningService';
 import { useAuth } from './AuthContext';
 
 const LearnContext = createContext(null);
@@ -7,7 +7,7 @@ const LearnContext = createContext(null);
 /**
  * Maps raw backend lesson data to the format expected by Learn UI components
  */
-const mapBackendLesson = (lesson, index = 0) => {
+export const mapBackendLesson = (lesson, index = 0) => {
   if (!lesson) return null;
   const id = lesson.slug || lesson.id || lesson._id;
   const category = lesson.category || 'Getting Started';
@@ -18,7 +18,7 @@ const mapBackendLesson = (lesson, index = 0) => {
   return {
     ...lesson,
     id,
-    slug: id,
+    slug: lesson.slug || id,
     lessonNumber: lesson.lessonNumber || index + 1,
     category,
     categoryId,
@@ -31,6 +31,7 @@ const mapBackendLesson = (lesson, index = 0) => {
     hasPostureGuide: Boolean(lesson.hasPostureGuide),
     hasFingerGuide: Boolean(lesson.hasFingerGuide),
     hasInteractiveKeyboard: Boolean(lesson.hasInteractiveKeyboard),
+    hasWpmVisualizer: Boolean(lesson.hasWpmVisualizer || lesson.slug === 'understanding-wpm-metrics'),
     sections: Array.isArray(lesson.sections) ? lesson.sections : [],
     drillText: lesson.drillText || '',
     quiz: lesson.quiz || null,
@@ -46,7 +47,7 @@ export const LearnProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // User progress state (replaces localStorage for authenticated users)
+  // User progress state
   const [completedLessons, setCompletedLessons] = useState(() => {
     try {
       const saved = localStorage.getItem('tara_completed_lessons');
@@ -74,8 +75,8 @@ export const LearnProvider = ({ children }) => {
     }
   });
 
-  const [lastVisitedLesson, setLastVisitedLesson] = useState(() => {
-    return localStorage.getItem('tara_last_lesson') || 'what-is-touch-typing';
+  const [lastVisitedLesson, setLastVisitedLessonState] = useState(() => {
+    return localStorage.getItem('tara_last_lesson') || '';
   });
 
   /**
@@ -85,55 +86,40 @@ export const LearnProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get('/lessons');
-      let rawLessons = [];
-      let backendProgress = null;
-
-      if (Array.isArray(res)) {
-        rawLessons = res;
-      } else if (res && typeof res === 'object') {
-        rawLessons = res.lessons || [];
-        backendProgress = res.progress || res.userProgress || null;
-      }
-
-      const mappedLessons = (rawLessons || []).map((l, idx) => mapBackendLesson(l, idx));
+      const rawList = await learningService.getLessons();
+      const mappedLessons = (rawList || []).map((l, idx) => mapBackendLesson(l, idx));
       setLessons(mappedLessons);
 
       // If user is authenticated, also fetch their authoritative progress
       if (isAuthenticated) {
         try {
-          const progRes = await api.get('/lessons/progress');
-          if (progRes?.progress) {
-            backendProgress = progRes.progress;
+          const progress = await learningService.getProgress();
+          if (progress) {
+            if (Array.isArray(progress.completedLessons)) {
+              setCompletedLessons(progress.completedLessons);
+            }
+            if (Array.isArray(progress.bookmarkedLessons)) {
+              setBookmarkedLessons(progress.bookmarkedLessons);
+            }
+            if (progress.quizScores) {
+              const scores =
+                progress.quizScores instanceof Map
+                  ? Object.fromEntries(progress.quizScores)
+                  : progress.quizScores;
+              setQuizScores(scores);
+            }
+            if (progress.lastVisitedLesson) {
+              setLastVisitedLessonState(progress.lastVisitedLesson);
+            }
           }
-        } catch {
-          // Keep backendProgress if already supplied
-        }
-      }
-
-      // If backend returned user progress for authenticated user
-      if (isAuthenticated && backendProgress) {
-        if (Array.isArray(backendProgress.completedLessons)) {
-          setCompletedLessons(backendProgress.completedLessons);
-        }
-        if (Array.isArray(backendProgress.bookmarkedLessons)) {
-          setBookmarkedLessons(backendProgress.bookmarkedLessons);
-        }
-        if (backendProgress.quizScores) {
-          const scores =
-            backendProgress.quizScores instanceof Map
-              ? Object.fromEntries(backendProgress.quizScores)
-              : backendProgress.quizScores;
-          setQuizScores(scores);
-        }
-        if (backendProgress.lastVisitedLesson) {
-          setLastVisitedLesson(backendProgress.lastVisitedLesson);
+        } catch (err) {
+          console.warn('Progress fetch notice:', err.message);
         }
       }
     } catch (err) {
-      console.warn('Learning API fetch notice (/api/lessons):', err.message);
+      console.error('Learning API fetch error (/api/lessons):', err);
       setError(err.message || 'Failed to load lessons');
-      setLessons([]); // Safe empty fallback
+      setLessons([]);
     } finally {
       setLoading(false);
     }
@@ -142,6 +128,22 @@ export const LearnProvider = ({ children }) => {
   useEffect(() => {
     fetchLessons();
   }, [fetchLessons]);
+
+  /**
+   * Dynamic categories derived directly from API lessons
+   */
+  const categories = useMemo(() => {
+    const map = new Map();
+    lessons.forEach((l) => {
+      if (l.categoryId && !map.has(l.categoryId)) {
+        map.set(l.categoryId, {
+          id: l.categoryId,
+          name: l.category || l.categoryId,
+        });
+      }
+    });
+    return Array.from(map.values());
+  }, [lessons]);
 
   /**
    * Guest fallback: Sync with localStorage ONLY when user is NOT authenticated
@@ -172,7 +174,7 @@ export const LearnProvider = ({ children }) => {
         const q = localStorage.getItem('tara_quiz_scores');
         setQuizScores(q ? JSON.parse(q) : {});
         const last = localStorage.getItem('tara_last_lesson');
-        if (last) setLastVisitedLesson(last);
+        if (last) setLastVisitedLessonState(last);
       } catch {
         setCompletedLessons([]);
         setBookmarkedLessons([]);
@@ -190,118 +192,98 @@ export const LearnProvider = ({ children }) => {
   // Next recommended lesson is the first uncompleted one or the first lesson
   const recommendedLesson = useMemo(() => {
     if (!lessons.length) return null;
-    const nextUncompleted = lessons.find((l) => !completedLessons.includes(l.id));
+    const nextUncompleted = lessons.find(
+      (l) => !completedLessons.includes(l.slug) && !completedLessons.includes(l.id)
+    );
     return nextUncompleted || lessons[0] || null;
   }, [lessons, completedLessons]);
 
   /**
    * Mark lesson completed:
-   * - Call POST /api/lessons/:slug/complete for authenticated users
-   * - Update React state from backend response
-   * - Fallback to localStorage for guests
+   * Calls POST /api/lessons/:slug/complete
    */
   const markLessonCompleted = async (lessonId, score = null) => {
-    // Optimistic local update so UI reflects immediately
+    // Optimistic local update
     setCompletedLessons((prev) => (prev.includes(lessonId) ? prev : [...prev, lessonId]));
     if (score !== null) {
       setQuizScores((prev) => ({ ...prev, [lessonId]: score }));
     }
-    setLastVisitedLesson(lessonId);
+    setLastVisitedLessonState(lessonId);
 
-    if (isAuthenticated) {
-      try {
-        const payload = {
-          score: score !== null ? Number(score) : undefined,
-          completedAt: new Date().toISOString(),
-        };
-        const res = await api.post(`/lessons/${lessonId}/complete`, payload);
-
-        // Update state from backend response if progress is returned
-        const progress = res?.progress || res?.userProgress || res;
-        if (progress && typeof progress === 'object') {
-          if (Array.isArray(progress.completedLessons)) {
-            setCompletedLessons(progress.completedLessons);
-          }
-          if (progress.quizScores) {
-            const scores =
-              progress.quizScores instanceof Map
-                ? Object.fromEntries(progress.quizScores)
-                : progress.quizScores;
-            setQuizScores(scores);
-          }
+    try {
+      const res = await learningService.completeLesson(lessonId, { score });
+      if (res?.progress) {
+        if (Array.isArray(res.progress.completedLessons)) {
+          setCompletedLessons(res.progress.completedLessons);
         }
-        return res;
-      } catch (err) {
-        console.warn(`Failed to record completion for lesson ${lessonId} on backend:`, err.message);
+        if (res.progress.quizScores) {
+          const scores =
+            res.progress.quizScores instanceof Map
+              ? Object.fromEntries(res.progress.quizScores)
+              : res.progress.quizScores;
+          setQuizScores(scores);
+        }
       }
+      return res;
+    } catch (err) {
+      console.warn(`Failed to record completion for lesson ${lessonId}:`, err.message);
     }
   };
 
   /**
-   * Toggle bookmark
+   * Toggle bookmark:
+   * Calls PATCH /api/lessons/:slug/bookmark
    */
   const toggleBookmark = async (lessonId) => {
     setBookmarkedLessons((prev) =>
       prev.includes(lessonId) ? prev.filter((id) => id !== lessonId) : [...prev, lessonId]
     );
 
-    if (isAuthenticated) {
-      try {
-        const res = await api.patch(`/lessons/${lessonId}/bookmark`);
-        if (res?.bookmarkedLessons && Array.isArray(res.bookmarkedLessons)) {
-          setBookmarkedLessons(res.bookmarkedLessons);
-        }
-      } catch (err) {
-        console.warn(`Failed to sync bookmark for lesson ${lessonId}:`, err.message);
+    try {
+      const res = await learningService.toggleBookmark(lessonId);
+      if (res?.bookmarkedLessons && Array.isArray(res.bookmarkedLessons)) {
+        setBookmarkedLessons(res.bookmarkedLessons);
       }
+      return res;
+    } catch (err) {
+      console.warn(`Failed to sync bookmark for lesson ${lessonId}:`, err.message);
     }
   };
 
-  const isBookmarked = (lessonId) => bookmarkedLessons.includes(lessonId);
-  const isCompleted = (lessonId) => completedLessons.includes(lessonId);
+  const isBookmarked = (lessonId) =>
+    bookmarkedLessons.includes(lessonId);
+
+  const isCompleted = (lessonId) =>
+    completedLessons.includes(lessonId);
 
   /**
-   * Set last visited lesson
+   * Set last visited lesson:
+   * Calls PATCH /api/lessons/:slug/last-visited
    */
   const handleSetLastVisitedLesson = async (lessonId) => {
-    setLastVisitedLesson(lessonId);
-    if (!isAuthenticated) {
-      try {
-        localStorage.setItem('tara_last_lesson', lessonId);
-      } catch {}
-    } else {
-      try {
-        await api.patch(`/lessons/${lessonId}/last-visited`);
-      } catch (err) {
-        console.warn(`Failed to sync last visited lesson ${lessonId}:`, err.message);
-      }
+    if (!lessonId) return;
+    setLastVisitedLessonState(lessonId);
+    try {
+      await learningService.updateLastVisited(lessonId);
+    } catch (err) {
+      console.warn(`Failed to sync last visited lesson ${lessonId}:`, err.message);
     }
   };
 
   /**
    * Reset progress:
-   * Clears local UI state. For guests, clears localStorage.
-   * For authenticated users, calls DELETE /api/lessons/progress.
+   * Calls DELETE /api/lessons/progress
    */
   const resetProgress = async () => {
     setCompletedLessons([]);
     setQuizScores({});
     setBookmarkedLessons([]);
-    setLastVisitedLesson(lessons[0]?.id || 'what-is-touch-typing');
+    setLastVisitedLessonState(lessons[0]?.slug || lessons[0]?.id || '');
 
-    if (!isAuthenticated) {
-      try {
-        localStorage.removeItem('tara_completed_lessons');
-        localStorage.removeItem('tara_bookmarked_lessons');
-        localStorage.removeItem('tara_quiz_scores');
-        localStorage.removeItem('tara_last_lesson');
-      } catch {}
-    } else {
-      try {
-        await api.delete('/lessons/progress');
-      } catch (err) {
-        console.warn('Failed to reset progress on backend:', err.message);
-      }
+    try {
+      await learningService.resetProgress();
+    } catch (err) {
+      console.warn('Failed to reset progress on backend:', err.message);
     }
   };
 
@@ -309,6 +291,7 @@ export const LearnProvider = ({ children }) => {
     <LearnContext.Provider
       value={{
         lessons,
+        categories,
         loading,
         error,
         completedLessons,

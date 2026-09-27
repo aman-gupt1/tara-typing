@@ -67,9 +67,18 @@ class AuthService {
   password
 );
 
-if (!isPasswordValid) {
-  throw new Error('Invalid credentials');
-}
+    if (!isPasswordValid) {
+      const error = new Error('Invalid email/username or password');
+      error.statusCode = 401;
+      throw error;
+    }
+
+    // Check if account has been blocked or deactivated by an administrator
+    if (user.active === false || user.status === 'suspended' || user.status === 'inactive') {
+      const error = new Error('Your account has been blocked by an administrator. You cannot log in.');
+      error.statusCode = 403;
+      throw error;
+    }
 
  
     const token = generateToken(user);

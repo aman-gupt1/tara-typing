@@ -10,8 +10,18 @@ const typingResultSchema = new mongoose.Schema(
     },
     mode: {
       type: String,
-      enum: ['words', 'quote', 'custom'],
       default: 'words',
+      index: true,
+    },
+    status: {
+      type: String,
+      enum: ['valid', 'suspicious'],
+      default: 'valid',
+      index: true,
+    },
+    isSuspicious: {
+      type: Boolean,
+      default: false,
       index: true,
     },
     duration: {
@@ -63,6 +73,9 @@ const typingResultSchema = new mongoose.Schema(
 
 // Indexes for fast leaderboard queries
 typingResultSchema.index({ duration: 1, wpm: -1, createdAt: -1 });
+typingResultSchema.index({ createdAt: -1, wpm: -1 });
+typingResultSchema.index({ user: 1, wpm: -1, accuracy: -1 });
+typingResultSchema.index({ isSuspicious: 1, wpm: -1 });
 typingResultSchema.index({ createdAt: -1 });
 
 export const TypingResult = mongoose.model('TypingResult', typingResultSchema);

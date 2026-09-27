@@ -1,6 +1,6 @@
-body{
+/* body{
   user-select: none;
-}
+} */
 
 .glow-primary {
   box-shadow: 0 4px 20px -4px rgba(37, 99, 235, 0.25);
@@ -512,32 +512,47 @@ html.dark .skeleton-shimmer {
 }
 
 /* Shared notification surface: consistent for every React-Toastify call. */
-.tara-toast-container {
-  width: min(24rem, calc(100vw - 2rem));
-  padding: 0;
+.tara-toast-container,
+.Toastify__toast-container,
+.Toastify__toast-container--top-right,
+.Toastify__toast-container--top-left,
+.Toastify__toast-container--top-center {
+  top: 1.25rem !important;
+  right: 1.25rem !important;
+  bottom: auto !important;
+  left: auto !important;
+  position: fixed !important;
+  width: min(24rem, calc(100vw - 2.5rem)) !important;
+  padding: 0 !important;
+  z-index: 999999 !important;
 }
 
-.Toastify__toast.tara-toast {
-  min-height: 0;
-  margin: 0 0 0.7rem;
-  padding: 0.85rem 0.95rem;
-  border: 1px solid var(--border);
-  border-radius: 0.9rem;
-  background: var(--card);
-  color: var(--foreground);
-  box-shadow: 0 16px 35px -16px rgba(15, 23, 42, 0.32), 0 6px 14px -8px rgba(37, 99, 235, 0.2);
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+.Toastify__toast.tara-toast,
+.Toastify__toast {
+  min-height: 0 !important;
+  margin: 0 0 0.75rem !important;
+  padding: 0.85rem 1rem !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 1rem !important;
+  -webkit-border-radius: 1rem !important;
+  background: var(--card) !important;
+  color: var(--foreground) !important;
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.35), 0 8px 18px -8px rgba(37, 99, 235, 0.22) !important;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif !important;
+  overflow: hidden !important;
 }
 
 .dark .Toastify__toast.tara-toast,
-html.dark .Toastify__toast.tara-toast {
-  box-shadow: 0 18px 38px -16px rgba(0, 0, 0, 0.72), 0 6px 16px -8px rgba(59, 130, 246, 0.28);
+html.dark .Toastify__toast.tara-toast,
+.dark .Toastify__toast,
+html.dark .Toastify__toast {
+  box-shadow: 0 22px 45px -15px rgba(0, 0, 0, 0.8), 0 8px 18px -8px rgba(59, 130, 246, 0.3) !important;
 }
 
-.Toastify__toast.tara-toast.Toastify__toast--success { border-left: 3px solid #22C55E; }
-.Toastify__toast.tara-toast.Toastify__toast--info { border-left: 3px solid var(--primary); }
-.Toastify__toast.tara-toast.Toastify__toast--error { border-left: 3px solid #EF4444; }
-.Toastify__toast.tara-toast.Toastify__toast--warning { border-left: 3px solid #F59E0B; }
+.Toastify__toast.tara-toast.Toastify__toast--success { border-left: 3.5px solid #22C55E !important; }
+.Toastify__toast.tara-toast.Toastify__toast--info { border-left: 3.5px solid var(--primary) !important; }
+.Toastify__toast.tara-toast.Toastify__toast--error { border-left: 3.5px solid #EF4444 !important; }
+.Toastify__toast.tara-toast.Toastify__toast--warning { border-left: 3.5px solid #F59E0B !important; }
 
 .tara-toast-body {
   margin: 0;
@@ -561,8 +576,36 @@ html.dark .Toastify__toast.tara-toast {
 
 .tara-toast-progress {
   height: 3px;
-  border-radius: 0 0 0.9rem 0.9rem;
+  border-radius: 0 0 1rem 1rem;
   background: var(--primary) !important;
+}
+
+/* Force top positioning & smooth border-radius on mobile viewports */
+@media only screen and (max-width: 480px) {
+  .tara-toast-container,
+  .Toastify__toast-container,
+  .Toastify__toast-container--top-right,
+  .Toastify__toast-container--top-left,
+  .Toastify__toast-container--top-center,
+  .Toastify__toast-container--bottom-right,
+  .Toastify__toast-container--bottom-left,
+  .Toastify__toast-container--bottom-center {
+    top: 1rem !important;
+    right: 1rem !important;
+    bottom: auto !important;
+    left: 1rem !important;
+    width: calc(100vw - 2rem) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .Toastify__toast.tara-toast,
+  .Toastify__toast {
+    border-radius: 1rem !important;
+    -webkit-border-radius: 1rem !important;
+    width: 100% !important;
+    margin-bottom: 0.75rem !important;
+  }
 }
 
 /* Page & Section Subtle Entrance */
@@ -791,19 +834,92 @@ html.dark .hero-keycap-glow {
   }
 }
 
-/* Utility to completely hide scrollbars */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+/* ==========================================================================
+   Universal Custom Scrollbar: Automatically applied across ALL scrollable elements
+   (Side Drawer, Modals, Tables, Textareas, Body & Auto-overflow Containers)
+   ========================================================================== */
+
+:root {
+  --scrollbar-thumb: rgba(148, 163, 184, 0.4);
+  --scrollbar-thumb-hover: rgba(139, 92, 246, 0.75);
+  --scrollbar-track: transparent;
 }
 
-/* Stylish Auto Scrollbar for Modals, Textareas & Scrollable Panels */
+.dark, html.dark {
+  --scrollbar-thumb: rgba(148, 163, 184, 0.28);
+  --scrollbar-thumb-hover: rgba(168, 85, 247, 0.85);
+  --scrollbar-track: rgba(15, 23, 42, 0.2);
+}
+
+/* Modern standard CSS scrollbar styling for all elements */
+html,
+body,
+*,
+*::before,
+*::after {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* WebKit / Chromium custom scrollbars globally (Chrome, Edge, Safari, Brave, Opera) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.2s ease;
+}
+
+.dark ::-webkit-scrollbar-thumb,
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.26);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.8); /* Tara Purple Brand Tone */
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.9);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Completely remove native Windows ugly arrow buttons */
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Utility to completely hide scrollbars where explicitly requested */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* Stylish Auto Scrollbar helper class */
 .stylish-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 .stylish-scrollbar::-webkit-scrollbar {
@@ -813,18 +929,18 @@ html.dark .hero-keycap-glow {
 
 .stylish-scrollbar::-webkit-scrollbar-track {
   background: transparent;
-  margin: 4px;
+  margin: 3px;
 }
 
 .stylish-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.35);
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: background-color 0.2s ease;
+  border: 1px solid transparent;
+  background-clip: padding-box;
 }
 
 .stylish-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.7);
+  background: rgba(139, 92, 246, 0.8);
 }
 
 .stylish-scrollbar::-webkit-scrollbar-corner {
@@ -832,40 +948,57 @@ html.dark .hero-keycap-glow {
 }
 
 .stylish-scrollbar::-webkit-scrollbar-button {
-  display: none;
-  width: 0;
-  height: 0;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
-/* Global textarea scrollbar styling to prevent default white browser scrollbars */
-textarea {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+/* Custom Duration Range Slider with Dynamic Accent Circular Thumb */
+.duration-range-slider {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-textarea::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+.duration-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--primary, #3B82F6);
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: none;
+  transition: transform 0.15s ease;
 }
 
-textarea::-webkit-scrollbar-track {
-  background: transparent;
-  margin: 4px;
+.duration-range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: none;
 }
 
-textarea::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: background-color 0.2s ease;
+.duration-range-slider::-webkit-slider-thumb:active {
+  transform: scale(1.25);
+  box-shadow: none;
 }
 
-textarea::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.7);
+.duration-range-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--primary, #3B82F6);
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: none;
+  transition: transform 0.15s ease;
 }
 
-textarea::-webkit-scrollbar-button {
-  display: none;
-  width: 0;
-  height: 0;
+.duration-range-slider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: none;
+}
+
+.duration-range-slider::-moz-range-thumb:active {
+  transform: scale(1.25);
+  box-shadow: none;
 }

@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
-import { Clock, CheckCircle2, Bookmark, BookmarkCheck, ArrowRight, Zap } from 'lucide-react';
+import { Clock, CheckCircle2, Bookmark, BookmarkCheck, ArrowRight } from 'lucide-react';
 import { useLearn } from '../../context/LearnContext';
 
 export const LessonCard = ({ lesson }) => {
   const { isCompleted, isBookmarked, toggleBookmark } = useLearn();
 
-  const completed = isCompleted(lesson.id);
-  const bookmarked = isBookmarked(lesson.id);
+  const lessonKey = lesson.slug || lesson.id;
+  const completed = isCompleted(lessonKey);
+  const bookmarked = isBookmarked(lessonKey);
 
   const difficultyColors = {
     Beginner: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
@@ -64,7 +65,7 @@ export const LessonCard = ({ lesson }) => {
             type="button"
             onClick={(e) => {
               e.preventDefault();
-              toggleBookmark(lesson.id);
+              toggleBookmark(lessonKey);
             }}
             aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark lesson'}
             className="text-muted-foreground hover:text-pink transition-colors p-1"
@@ -90,7 +91,7 @@ export const LessonCard = ({ lesson }) => {
         </div>
 
         <Link
-          to={`/learn/lesson/${lesson.id}`}
+          to={`/learn/lesson/${lessonKey}`}
           className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all select-none ${
             completed
               ? 'border border-success/40 bg-success/15 text-success hover:bg-success/25'

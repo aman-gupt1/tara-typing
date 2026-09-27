@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Sparkles, Moon, Sun, Menu, User, Settings, LogOut } from 'lucide-react';
+import { Sparkles, Moon, Sun, Menu, User, Settings, LogOut, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import MobileSidebar from './MobileSidebar';
@@ -176,6 +176,17 @@ export const Navbar = () => {
 
                     {/* Navigation Links */}
                     <div className="py-1" role="none">
+                      {user?.role === 'admin' && (
+                        <Link
+                          to="/admin"
+                          role="menuitem"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 select-none cursor-pointer transition-colors"
+                        >
+                          <ShieldCheck size={17} className="text-purple-400 shrink-0" />
+                          <span>Admin Dashboard</span>
+                        </Link>
+                      )}
                       <Link
                         to="/profile"
                         role="menuitem"

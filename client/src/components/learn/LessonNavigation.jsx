@@ -13,8 +13,9 @@ export const LessonNavigation = ({
   const { setTestConfig } = useTypingContext();
   const navigate = useNavigate();
 
-  const completed = isCompleted(currentLesson.id);
-  const bookmarked = isBookmarked(currentLesson.id);
+  const currentKey = currentLesson.slug || currentLesson.id;
+  const completed = isCompleted(currentKey);
+  const bookmarked = isBookmarked(currentKey);
 
   const handleSandboxPractice = () => {
     if (currentLesson.practicePreset) {
@@ -33,7 +34,7 @@ export const LessonNavigation = ({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => toggleBookmark(currentLesson.id)}
+            onClick={() => toggleBookmark(currentKey)}
             className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition-colors select-none ${
               bookmarked
                 ? 'border-pink/40 bg-pink/15 text-pink font-semibold'
@@ -73,7 +74,7 @@ export const LessonNavigation = ({
       <div className="flex items-center justify-between gap-3">
         {prevLesson ? (
           <Link
-            to={`/learn/lesson/${prevLesson.id}`}
+            to={`/learn/lesson/${prevLesson.slug || prevLesson.id}`}
             className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors select-none"
           >
             <ChevronLeft size={16} />
@@ -89,7 +90,7 @@ export const LessonNavigation = ({
 
         {nextLesson ? (
           <Link
-            to={`/learn/lesson/${nextLesson.id}`}
+            to={`/learn/lesson/${nextLesson.slug || nextLesson.id}`}
             className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-medium text-foreground hover:bg-accent transition-colors select-none ml-auto"
           >
             <div className="text-right hidden sm:block">
