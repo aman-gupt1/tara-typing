@@ -16,23 +16,29 @@ import {
   Info,
   GraduationCap,
   ShieldCheck,
+  Zap,
+  Award,
+  Bot,
 } from 'lucide-react';
 import UserAvatar from '../common/UserAvatar';
 import RoleBadge from '../common/RoleBadge';
 import { useAuth } from '../../context/AuthContext';
+import { useChatbot } from '../../context/ChatbotContext';
 
 const mainNavItems = [
   { path: '/', label: 'Home', icon: Home },
   { path: '/typing-test', label: 'Typing Test', icon: Keyboard },
+  { path: '/race', label: 'Race', icon: Zap },
   { path: '/practice', label: 'Practice', icon: BookOpen },
   { path: '/learn', label: 'Learn Typing', icon: GraduationCap },
   { path: '/leaderboard', label: 'Leaderboard', icon: Trophy },
-  { path: '/daily-challenge', label: 'Daily Challenge', icon: Flame },
+  { path: '/daily-challenge', label: 'Daily Challenges', icon: Flame },
   { path: '/about', label: 'About', icon: Info },
 ];
 
 export const MobileSidebar = ({ open, onClose }) => {
   const { isAuthenticated, user, logout } = useAuth();
+  const { openChat } = useChatbot();
   const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
 
@@ -210,6 +216,20 @@ export const MobileSidebar = ({ open, onClose }) => {
                         <span>Profile</span>
                       </NavLink>
                       <NavLink
+                        to="/certificate"
+                        onClick={onClose}
+                        className={({ isActive }) =>
+                          `flex h-11 items-center gap-3 rounded-xl px-3.5 text-sm font-medium transition-colors select-none ${
+                            isActive
+                              ? 'bg-primary/15 font-semibold text-primary border border-primary/30'
+                              : 'text-amber-500 dark:text-amber-400 hover:bg-amber-500/10'
+                          }`
+                        }
+                      >
+                        <Award size={18} aria-hidden="true" className="shrink-0 text-amber-500 dark:text-amber-400" />
+                        <span>Certificate</span>
+                      </NavLink>
+                      <NavLink
                         to="/settings"
                         onClick={onClose}
                         className={({ isActive }) =>
@@ -223,6 +243,24 @@ export const MobileSidebar = ({ open, onClose }) => {
                         <Settings size={18} aria-hidden="true" className="shrink-0" />
                         <span>Settings</span>
                       </NavLink>
+
+                      {/* AI Typing Assistant */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          openChat();
+                        }}
+                        className="flex h-11 w-full items-center justify-between rounded-xl px-3.5 text-sm font-semibold text-purple-500 dark:text-purple-400 hover:bg-purple-500/10 transition-colors select-none cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Bot size={18} aria-hidden="true" className="shrink-0" />
+                          <span>AI Typing Assistant</span>
+                        </div>
+                        <span className="text-[9px] font-black uppercase bg-purple-500/20 text-purple-400 px-1.5 py-0.2 rounded-full border border-purple-500/30">
+                          AI
+                        </span>
+                      </button>
                     </nav>
                   </div>
                 )}

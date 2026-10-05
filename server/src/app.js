@@ -23,6 +23,7 @@ import adminLeaderboardRoutes from './routes/admin/adminLeaderboard.routes.js';
 import adminLearningRoutes from './routes/admin/adminLearning.routes.js';
 import adminAchievementRoutes from './routes/admin/adminAchievement.routes.js';
 import adminAnalyticsRoutes from './routes/admin/adminAnalytics.routes.js';
+import aiRoutes from './routes/ai.routes.js';
 // Import Middleware
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
@@ -79,6 +80,7 @@ app.use('/api/typing', typingRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/daily-challenge', challengeRoutes);
 app.use('/api/practice', practiceRoutes);
+app.use('/api/ai', aiRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/lessons', lessonRoutes);
 app.use('/api/daily-challenge', dailyChallengeRoutes);

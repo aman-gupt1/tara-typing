@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Sparkles, Moon, Sun, Menu, User, Settings, LogOut, ShieldCheck } from 'lucide-react';
+import { Sparkles, Moon, Sun, Menu, User, Settings, LogOut, ShieldCheck, Award, Bot } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useChatbot } from '../../context/ChatbotContext';
 import MobileSidebar from './MobileSidebar';
 import UserAvatar from '../common/UserAvatar';
 import RoleBadge from '../common/RoleBadge';
@@ -11,16 +12,18 @@ import RoleBadge from '../common/RoleBadge';
 const navLinks = [
   { path: '/', label: 'Home' },
   { path: '/typing-test', label: 'Typing Test' },
+  { path: '/race', label: 'Race' },
   { path: '/practice', label: 'Practice' },
   { path: '/learn', label: 'Learn Typing' },
   { path: '/leaderboard', label: 'Leaderboard' },
-  { path: '/daily-challenge', label: 'Daily Challenge' },
+  { path: '/daily-challenge', label: 'Daily Challenges' },
   { path: '/about', label: 'About' },
 ];
 
 export const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { openChat } = useChatbot();
   const shouldReduceMotion = useReducedMotion();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -58,7 +61,7 @@ export const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-[60] border-b border-border bg-background/80 backdrop-blur-xl">
       <nav
         className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6"
         aria-label="Main navigation"
@@ -80,16 +83,16 @@ export const Navbar = () => {
         </Link>
 
         {/* Center Desktop Navigation */}
-        <div className="hidden items-center gap-6 lg:flex">
+        <div className="hidden items-center gap-3.5 xl:gap-6 lg:flex">
           {navLinks.map((link) => (
             <NavLink
               key={link.path}
               to={link.path}
               className={({ isActive }) =>
-                `relative py-1 text-sm transition-colors hover:text-foreground ${
+                `relative py-1 text-sm xl:text-[15px] transition-colors hover:text-foreground whitespace-nowrap ${
                   isActive
                     ? 'font-semibold text-foreground after:absolute after:-bottom-[21px] after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-full'
-                    : 'text-muted-foreground'
+                    : 'font-medium text-muted-foreground'
                 }`
               }
             >
@@ -153,10 +156,10 @@ export const Navbar = () => {
                       exit: { duration: shouldReduceMotion ? 0.05 : 0.12, ease: 'easeIn' },
                       ease: [0.16, 1, 0.3, 1],
                     }}
-                    className="absolute right-0 mt-2.5 w-64 rounded-xl border border-[#1E293B] bg-[#0B1120] p-2 shadow-2xl shadow-black/80 backdrop-blur-xl z-50 select-none origin-top-right"
+                    className="absolute right-0 mt-2.5 w-64 rounded-xl border border-border bg-card p-2 shadow-2xl shadow-black/40 backdrop-blur-xl z-[70] select-none origin-top-right text-foreground"
                   >
                     {/* User Profile Header with Role Badge */}
-                    <div className="flex items-center gap-3 border-b border-[#1E293B] p-2.5 pb-3">
+                    <div className="flex items-center gap-3 border-b border-border p-2.5 pb-3">
                       <UserAvatar
                         src={user.avatar}
                         name={user.name}
@@ -167,10 +170,10 @@ export const Navbar = () => {
                       />
                       <div className="min-w-0 flex-1 overflow-hidden">
                         <div className="flex items-center justify-between gap-1.5">
-                          <p className="truncate text-sm font-bold text-white">{user.name}</p>
+                          <p className="truncate text-sm font-bold text-foreground">{user.name}</p>
                           <RoleBadge role={user.role} />
                         </div>
-                        <p className="truncate text-xs text-slate-400 mt-0.5">@{user.username || 'user'}</p>
+                        <p className="truncate text-xs text-muted-foreground mt-0.5">@{user.username || 'user'}</p>
                       </div>
                     </div>
 
@@ -181,9 +184,9 @@ export const Navbar = () => {
                           to="/admin"
                           role="menuitem"
                           onClick={() => setDropdownOpen(false)}
-                          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 select-none cursor-pointer transition-colors"
+                          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-purple-500 dark:text-purple-400 hover:text-purple-600 dark:hover:text-purple-300 hover:bg-purple-500/10 select-none cursor-pointer transition-colors"
                         >
-                          <ShieldCheck size={17} className="text-purple-400 shrink-0" />
+                          <ShieldCheck size={17} className="text-purple-500 dark:text-purple-400 shrink-0" />
                           <span>Admin Dashboard</span>
                         </Link>
                       )}
@@ -191,31 +194,59 @@ export const Navbar = () => {
                         to="/profile"
                         role="menuitem"
                         onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-200 select-none cursor-pointer"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-accent select-none cursor-pointer transition-colors"
                       >
-                        <User size={17} className="text-slate-400 shrink-0" />
+                        <User size={17} className="text-muted-foreground shrink-0" />
                         <span>Profile</span>
+                      </Link>
+                      <Link
+                        to="/certificate"
+                        role="menuitem"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-amber-500 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 hover:bg-amber-500/10 select-none cursor-pointer transition-colors"
+                      >
+                        <Award size={17} className="text-amber-500 dark:text-amber-400 shrink-0" />
+                        <span>Certificate</span>
                       </Link>
                       <Link
                         to="/settings"
                         role="menuitem"
                         onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-200 select-none cursor-pointer"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-accent select-none cursor-pointer transition-colors"
                       >
-                        <Settings size={17} className="text-slate-400 shrink-0" />
+                        <Settings size={17} className="text-muted-foreground shrink-0" />
                         <span>Settings</span>
                       </Link>
+
+                      {/* AI Typing Assistant Trigger */}
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          openChat();
+                        }}
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 hover:bg-purple-500/10 select-none cursor-pointer transition-colors"
+                      >
+                        <Bot size={17} className="text-purple-600 dark:text-purple-400 shrink-0" />
+                        <span className="flex items-center justify-between flex-1">
+                          <span>AI Typing Assistant</span>
+                          <span className="text-[9px] font-black uppercase bg-purple-500/20 text-purple-500 dark:text-purple-300 px-1.5 py-0.2 rounded-full border border-purple-500/30">
+                            AI
+                          </span>
+                        </span>
+                      </button>
                     </div>
 
                     {/* Divider & Logout Action */}
-                    <div className="border-t border-[#1E293B] pt-1" role="none">
+                    <div className="border-t border-border pt-1" role="none">
                       <button
                         type="button"
                         role="menuitem"
                         onClick={handleLogout}
-                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[#EF4444] select-none cursor-pointer"
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 select-none cursor-pointer transition-colors"
                       >
-                        <LogOut size={17} className="text-[#EF4444] shrink-0" />
+                        <LogOut size={17} className="text-destructive shrink-0" />
                         <span>Logout</span>
                       </button>
                     </div>

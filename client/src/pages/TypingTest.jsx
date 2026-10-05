@@ -5,11 +5,12 @@ import {
   Volume2, VolumeX, Eye, Check, Keyboard as KeyboardIcon,
   Sparkles, RefreshCw, AlertCircle, CheckSquare,
   TrendingUp, Lightbulb, Settings as SettingsIcon,
-  Minus, Plus, X,
+  Minus, Plus, X, Dice5,
 } from 'lucide-react';
 import SEO from '../components/common/SEO';
 import Keyboard from '../components/typing/Keyboard';
 import CustomTextModal from '../components/typing/CustomTextModal';
+import AIPromptModal from '../components/typing/AIPromptModal';
 import { useTypingContext } from '../context/TypingContext';
 import { useSettings } from '../context/SettingsContext';
 import { useAuth } from '../context/AuthContext';
@@ -33,6 +34,7 @@ const modes = [
   { id: 'words',  label: 'Words'  },
   { id: 'quote',  label: 'Quote'  },
   { id: 'code',   label: 'Code'   },
+  { id: 'ai',     label: 'AI Topic', isAi: true },
   { id: 'custom', label: 'Custom' },
 ];
 
@@ -172,6 +174,7 @@ export const TypingTest = () => {
   const [mode, setMode]             = useState(testConfig.mode || 'words');
   const [difficulty, setDifficulty] = useState('easy');
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
   // Settings state (with localStorage persistence)
   const [showLiveWpm, setShowLiveWpm]             = useState(() => localStorage.getItem('tara_live_wpm') !== 'false');
@@ -294,11 +297,18 @@ export const TypingTest = () => {
       const minutes = Math.max(totalSeconds, 1) / 60;
       let correct = 0;
       let errors = 0;
+      const errorKeysList = [];
       const completedTyped = typedRef.current;
       const targetText = textRef.current;
       for (let i = 0; i < completedTyped.length; i++) {
-        if (completedTyped[i] === targetText[i]) correct++;
-        else errors++;
+        if (completedTyped[i] === targetText[i]) {
+          correct++;
+        } else {
+          errors++;
+          if (targetText[i] && targetText[i] !== ' ') {
+            errorKeysList.push(targetText[i].toLowerCase());
+          }
+        }
       }
       const finalWpm = Math.round(correct / 5 / minutes);
       const finalRawWpm = Math.round(completedTyped.length / 5 / minutes);
@@ -311,6 +321,7 @@ export const TypingTest = () => {
         accuracy: finalAccuracy,
         errors,
         mistakes: errors,
+        errorKeys: Array.from(new Set(errorKeysList)),
         correctCharacters: correct,
         totalCharacters: completedTyped.length,
         duration: durationRef.current,
@@ -525,7 +536,7 @@ export const TypingTest = () => {
 
   // Handle keystrokes with synchronous refs & pure 1-to-1 character matching
   const handleKeyDown = (e) => {
-    if (finishedRef.current || isCustomModalOpen) return;
+    if (finishedRef.current || isCustomModalOpen || isAiModalOpen) return;
 
     // Quick restart via Tab or Ctrl+Enter
     if (e.key === 'Tab' || (e.key === 'Enter' && e.ctrlKey)) {
@@ -695,12 +706,16 @@ export const TypingTest = () => {
   };
 
   const handleModeChange = (m) => {
+    if (m === 'ai') {
+      setIsAiModalOpen(true);
+      return;
+    }
     if (m === 'custom') {
       setIsCustomModalOpen(true);
       return;
     }
     setMode(m);
-    setTestConfig((prev) => ({ ...prev, mode: m }));
+    setTestConfig((prev) => ({ ...prev, mode: m, customText: '' }));
     restart(duration, m, difficulty);
   };
 
@@ -715,12 +730,24 @@ export const TypingTest = () => {
     restart(duration, 'custom', difficulty, custom);
   };
 
+  const handleApplyAiText = (generatedText, aiMode, meta) => {
+    const finalMode = aiMode === 'code' ? 'code' : 'custom';
+    setMode(finalMode);
+    setTestConfig((prev) => ({
+      ...prev,
+      mode: finalMode,
+      customText: generatedText,
+      aiTopic: meta?.topic,
+    }));
+    restart(duration, 'custom', difficulty, generatedText);
+  };
+
   // Timer circular stroke progress calculation
   const timeProgress = duration > 0 ? (duration - timeLeft) / duration : 0;
   const strokeDashoffset = 88 - 88 * timeProgress;
 
   return (
-    <div className="min-h-full bg-[#0B1120] text-[#F8FAFC]">
+    <div className="min-h-full bg-background text-foreground transition-colors duration-200">
       <SEO
         title="Typing Speed Test — Tara Typing"
         description="Test Your Typing Speed. Type as accurately and fast as you can. Track live WPM, accuracy, and climb the ranks!"
@@ -728,7 +755,7 @@ export const TypingTest = () => {
 
       <main
         className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 lg:px-8 select-none"
-        onClick={() => inputRef.current?.focus()}
+        onClick={() => !isCustomModalOpen && !isAiModalOpen && inputRef.current?.focus()}
       >
         {/* Hidden screen-reader heading */}
         <h1 className="sr-only">Typing Test — Test Your Typing Speed</h1>
@@ -736,7 +763,7 @@ export const TypingTest = () => {
         {/* ── HERO SECTION ── */}
         <div className="grid gap-6 lg:grid-cols-[1fr_auto] items-center">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1.5 text-xs font-semibold text-amber-400">
+            <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1.5 text-xs font-semibold text-amber-500 dark:text-amber-400">
               <span className="text-sm leading-none">⚡</span> Typing Test
             </span>
             <h2 className="mt-3.5 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
@@ -750,10 +777,10 @@ export const TypingTest = () => {
 
           {/* Hero Promotional Card with Glowing Isometric Keyboard Graphic */}
           <div className="hidden lg:flex items-center gap-4">
-            <div className="group relative overflow-hidden rounded-2xl border border-primary/25 bg-[#081024] p-3.5 sm:px-4 sm:py-3 shadow-[0_0_30px_-8px_rgba(59,130,246,0.3)] w-[360px] sm:w-[380px] h-[126px] flex flex-col justify-between select-none transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-[0_0_35px_-4px_rgba(59,130,246,0.45)] cursor-default">
+            <div className="card-glass group relative overflow-hidden rounded-2xl border border-border bg-card p-3.5 sm:px-4 sm:py-3 shadow-md shadow-primary/5 w-[360px] sm:w-[380px] h-[126px] flex flex-col justify-between select-none transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 cursor-default">
               {/* Isometric Keyboard Graphic with Atmospheric Glow */}
               <div className="pointer-events-none absolute -right-3 -top-2 w-48 h-40 transition-transform duration-500 ease-out group-hover:scale-105">
-                <div className="absolute inset-4 rounded-full bg-primary/25 blur-xl group-hover:bg-primary/35 transition-colors duration-500" />
+                <div className="absolute inset-4 rounded-full bg-primary/20 blur-xl group-hover:bg-primary/30 transition-colors duration-500" />
                 <svg viewBox="0 0 200 140" className="w-full h-full">
                   <defs>
                     <linearGradient id="kbBody" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -846,7 +873,7 @@ export const TypingTest = () => {
         </div>
 
         {/* ── TEST CONTROL BAR (Figma Mockup) ── */}
-        <div className="mt-7 card-glass rounded-2xl p-3 sm:p-4 border border-[#1E293B] bg-[#111827] transition-all duration-300 hover:border-primary/40 hover:shadow-[0_8px_30px_-6px_rgba(59,130,246,0.15)]">
+        <div className="mt-7 card-glass rounded-2xl p-3 sm:p-4 border border-border/80 bg-card/70 backdrop-blur-md transition-all duration-300 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5">
           <div className="flex flex-wrap items-center justify-between gap-3.5">
             {/* Left Controls: Text Type + Difficulty */}
             <div className="flex flex-wrap items-center gap-3 sm:gap-4">
@@ -856,20 +883,34 @@ export const TypingTest = () => {
                 <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                   Text Type
                 </p>
-                <div className="flex items-center gap-1 rounded-xl border border-border bg-[#0B1120] p-1 sm:p-1.5 h-10">
+                <div className="flex items-center gap-1 rounded-xl border border-border bg-muted/40 dark:bg-slate-950/60 p-1 sm:p-1.5 h-10">
                   {modes.map((m) => (
                     <button
                       key={m.id}
                       type="button"
                       onClick={() => handleModeChange(m.id)}
                       aria-pressed={mode === m.id}
-                      className={`rounded-lg px-3.5 py-1 text-xs sm:text-sm font-medium transition-all select-none ${
+                      className={`rounded-lg px-2.5 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-all select-none flex items-center gap-1.5 cursor-pointer ${
                         mode === m.id
-                          ? 'bg-primary text-white font-semibold shadow-sm shadow-primary/30'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-slate-800/60'
+                          ? m.isAi
+                            ? 'bg-gradient-to-r from-primary via-purple-600 to-indigo-600 text-white font-bold shadow-md shadow-primary/30'
+                            : 'bg-primary text-primary-foreground font-semibold shadow-sm shadow-primary/30'
+                          : m.isAi
+                            ? 'bg-gradient-to-r from-purple-500/10 to-amber-500/10 text-purple-600 dark:text-purple-300 border border-purple-500/30 hover:border-purple-500 hover:bg-purple-500/20 font-semibold'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                       }`}
                     >
-                      {m.label}
+                      {m.isAi ? (
+                        <>
+                          <Sparkles size={13} className="text-amber-400 animate-pulse shrink-0" />
+                          <span>{m.label}</span>
+                          <span className="hidden xl:inline-flex items-center gap-0.5 px-1.5 py-0.2 text-[9px] rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30 font-bold ml-0.5">
+                            <Dice5 size={9} /> Surprise
+                          </span>
+                        </>
+                      ) : (
+                        <span>{m.label}</span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -883,7 +924,7 @@ export const TypingTest = () => {
                 <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                   Difficulty
                 </p>
-                <div className="flex items-center gap-1 rounded-xl border border-border bg-[#0B1120] p-1 sm:p-1.5 h-10">
+                <div className="flex items-center gap-1 rounded-xl border border-border bg-muted/40 dark:bg-slate-950/60 p-1 sm:p-1.5 h-10">
                   {difficulties.map((diff) => (
                     <button
                       key={diff.id}
@@ -892,8 +933,8 @@ export const TypingTest = () => {
                       aria-pressed={difficulty === diff.id}
                       className={`rounded-lg px-3.5 py-1 text-xs sm:text-sm font-medium transition-all select-none ${
                         difficulty === diff.id
-                          ? 'bg-primary text-white font-semibold shadow-sm shadow-primary/30'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-slate-800/60'
+                          ? 'bg-primary text-primary-foreground font-semibold shadow-sm shadow-primary/30'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                       }`}
                     >
                       {diff.label}
@@ -911,7 +952,7 @@ export const TypingTest = () => {
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
                   {/* Duration Toggle: 30s | 1m | 2m | 5m | Custom */}
-                  <div className="flex items-center gap-1 rounded-xl border border-border bg-[#0B1120] p-1 sm:p-1.5 h-10">
+                  <div className="flex items-center gap-1 rounded-xl border border-border bg-muted/40 dark:bg-slate-950/60 p-1 sm:p-1.5 h-10">
                     {DURATION_OPTIONS.map((opt) => (
                       <button
                         key={opt.id}
@@ -920,8 +961,8 @@ export const TypingTest = () => {
                         aria-pressed={activePreset === opt.id}
                         className={`rounded-lg px-2.5 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-all select-none min-w-[36px] text-center ${
                           activePreset === opt.id
-                            ? 'bg-primary text-white font-semibold shadow-sm shadow-primary/30'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-slate-800/60'
+                            ? 'bg-primary text-primary-foreground font-semibold shadow-sm shadow-primary/30'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                         }`}
                       >
                         {opt.id === 'custom' ? (isCustomDuration ? `${durationMinutes}m` : 'Custom') : opt.label}
@@ -931,17 +972,17 @@ export const TypingTest = () => {
 
                   {/* Expanded Custom Duration Controls (when Custom is selected and controls are open) */}
                   {isCustomDuration && isCustomControlsOpen && (
-                    <div className="flex items-center gap-2 rounded-xl border border-primary/50 bg-[#0B1120] px-3 py-1 h-10 select-none animate-in fade-in zoom-in-95 duration-150">
+                    <div className="flex items-center gap-2 rounded-xl border border-primary/50 bg-card px-3 py-1 h-10 select-none animate-in fade-in zoom-in-95 duration-150 shadow-sm">
                       <button
                         type="button"
                         onClick={() => handleCustomStep(-1)}
                         disabled={durationMinutes <= 1}
-                        className="w-6 h-6 flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 hover:border-primary/60 hover:text-primary text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all select-none"
+                        className="w-6 h-6 flex items-center justify-center rounded-lg bg-muted border border-border hover:border-primary/60 hover:text-primary text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-all select-none"
                         aria-label="Decrease duration by 1 minute"
                       >
                         <Minus size={13} strokeWidth={2.5} />
                       </button>
-                      <span className="text-xs font-semibold text-slate-200 font-mono select-none">1m</span>
+                      <span className="text-xs font-semibold text-foreground font-mono select-none">1m</span>
                       <input
                         type="range"
                         min="1"
@@ -952,35 +993,35 @@ export const TypingTest = () => {
                         aria-label="Custom Duration (1 to 30 minutes)"
                         className="duration-range-slider w-20 sm:w-28 h-1.5 rounded-lg appearance-none cursor-pointer focus:outline-none"
                         style={{
-                          background: `linear-gradient(to right, var(--primary) 0%, var(--primary) ${((durationMinutes - 1) / 29) * 100}%, #334155 ${((durationMinutes - 1) / 29) * 100}%, #334155 100%)`,
+                          background: `linear-gradient(to right, var(--primary) 0%, var(--primary) ${((durationMinutes - 1) / 29) * 100}%, #cbd5e1 ${((durationMinutes - 1) / 29) * 100}%, #cbd5e1 100%)`,
                         }}
                       />
-                      <span className="text-xs font-semibold text-slate-200 font-mono select-none">30m</span>
+                      <span className="text-xs font-semibold text-foreground font-mono select-none">30m</span>
                       <button
                         type="button"
                         onClick={() => handleCustomStep(1)}
                         disabled={durationMinutes >= 30}
-                        className="w-6 h-6 flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 hover:border-primary/60 hover:text-primary text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all select-none"
+                        className="w-6 h-6 flex items-center justify-center rounded-lg bg-muted border border-border hover:border-primary/60 hover:text-primary text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-all select-none"
                         aria-label="Increase duration by 1 minute"
                       >
                         <Plus size={13} strokeWidth={2.5} />
                       </button>
-                      <div className="h-4 w-px bg-slate-700/80 mx-0.5" />
+                      <div className="h-4 w-px bg-border mx-0.5" />
                       <div className="relative group/close flex items-center">
                         <button
                           type="button"
                           onClick={() => setIsCustomControlsOpen(false)}
-                          className="w-6 h-6 flex items-center justify-center rounded-lg text-muted-foreground hover:text-white hover:bg-slate-800 transition-colors"
+                          className="w-6 h-6 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                           aria-label="Close / Hide custom duration"
                         >
                           <X size={13} strokeWidth={2.5} />
                         </button>
                         {/* Tooltip positioned on top of the button */}
                         <div className="absolute bottom-full right-0 mb-2 flex flex-col items-end opacity-0 invisible group-hover/close:opacity-100 group-hover/close:visible transition-all duration-150 pointer-events-none z-30">
-                          <div className="px-2 py-0.5 text-[10px] font-medium text-slate-200 bg-slate-800 border border-slate-700 rounded shadow-md whitespace-nowrap select-none">
+                          <div className="px-2 py-0.5 text-[10px] font-medium text-popover-foreground bg-popover border border-border rounded shadow-md whitespace-nowrap select-none">
                             Close / Hide
                           </div>
-                          <div className="w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-slate-800 mr-2 -mt-px" />
+                          <div className="w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-popover mr-2 -mt-px" />
                         </div>
                       </div>
                     </div>
@@ -994,7 +1035,7 @@ export const TypingTest = () => {
               type="button"
               onClick={() => restart(duration, mode, difficulty)}
               aria-label="Generate new test"
-              className="flex items-center gap-2 rounded-xl border border-border bg-[#0B1120] hover:border-primary/60 hover:text-white px-4 py-2 text-xs sm:text-sm font-semibold text-foreground transition-all shadow-sm select-none h-10 self-end"
+              className="flex items-center gap-2 rounded-xl border border-border bg-card hover:border-primary/60 hover:bg-accent hover:text-foreground px-4 py-2 text-xs sm:text-sm font-semibold text-foreground transition-all shadow-sm select-none h-10 self-end"
             >
               <RotateCcw size={15} />
               <span>New Test</span>
@@ -1010,8 +1051,8 @@ export const TypingTest = () => {
 
             {/* 1. TYPING PASSAGE CARD */}
             <div
-              className="card-glass rounded-2xl border border-[#1E293B] bg-[#111827] py-[6px] sm:py-2 px-5 sm:px-7 md:px-8 shadow-sm transition-all duration-300 hover:border-primary/45 hover:shadow-[0_8px_30px_-6px_rgba(59,130,246,0.2)] focus-within:border-primary/60 focus-within:shadow-[0_0_25px_-4px_rgba(59,130,246,0.25)] relative cursor-text"
-              onClick={() => inputRef.current?.focus()}
+              className="card-glass rounded-2xl border border-border/80 bg-card/70 py-[6px] sm:py-2 px-5 sm:px-7 md:px-8 shadow-sm transition-all duration-300 hover:border-primary/45 hover:shadow-lg hover:shadow-primary/5 focus-within:border-primary/60 focus-within:shadow-[0_0_25px_-4px_rgba(59,130,246,0.25)] relative cursor-text"
+              onClick={() => !isCustomModalOpen && !isAiModalOpen && inputRef.current?.focus()}
             >
               {/* Strict Letter-by-Letter Character Passage (Fixed 3-Line Box, No scrollbar, Smooth line movement) */}
               <div
@@ -1048,7 +1089,7 @@ export const TypingTest = () => {
                           <span
                             key={index}
                             ref={attachRef}
-                            className="text-[#22C55E] font-normal transition-colors duration-75"
+                            className="text-emerald-500 font-normal transition-colors duration-75"
                           >
                             {char}
                           </span>
@@ -1058,7 +1099,7 @@ export const TypingTest = () => {
                           <span
                             key={index}
                             ref={attachRef}
-                            className="text-[#EF4444] font-normal transition-colors duration-75"
+                            className="text-rose-500 font-normal transition-colors duration-75"
                           >
                             {char === ' ' ? '·' : char}
                           </span>
@@ -1066,7 +1107,7 @@ export const TypingTest = () => {
                       }
                     }
 
-                    // State 2: Current character (Clean white text, NO underline, NO background)
+                    // State 2: Current character (Clean high-contrast text, NO underline, NO background)
                     if (index === typed.length) {
                       if (char === ' ') {
                         return (
@@ -1084,8 +1125,8 @@ export const TypingTest = () => {
                             key={index}
                             ref={attachRef}
                             className={`${
-                              highlightLetter ? 'text-white' : 'text-[#94A3B8]/60 dark:text-[#64748B]'
-                            } font-normal transition-colors duration-75`}
+                              highlightLetter ? 'text-foreground font-semibold' : 'text-muted-foreground/60'
+                            } transition-colors duration-75`}
                           >
                             {char}
                           </span>
@@ -1098,7 +1139,7 @@ export const TypingTest = () => {
                       <span
                         key={index}
                         ref={attachRef}
-                        className="text-[#94A3B8]/60 dark:text-[#64748B] font-normal"
+                        className="text-muted-foreground/50 font-normal"
                       >
                         {char}
                       </span>
@@ -1120,13 +1161,13 @@ export const TypingTest = () => {
                 autoCapitalize="off"
                 spellCheck={false}
                 onKeyDown={handleKeyDown}
-                onBlur={() => !finished && !isCustomModalOpen && inputRef.current?.focus()}
+                onBlur={() => !finished && !isCustomModalOpen && !isAiModalOpen && inputRef.current?.focus()}
               />
             </div>
 
             {/* 2. ON-SCREEN KEYBOARD CARD (Contains ONLY the keyboard) */}
             {showKeyboard && (
-              <div className="card-glass rounded-2xl border border-[#1E293B] bg-[#111827] p-4 sm:p-5 shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-[0_8px_30px_-6px_rgba(59,130,246,0.15)] cursor-default">
+              <div className="card-glass rounded-2xl border border-border/80 bg-card/70 p-4 sm:p-5 shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 cursor-default">
                 <Keyboard nextChar={text[typed.length]} lastKey={lastKey} />
               </div>
             )}
@@ -1137,11 +1178,11 @@ export const TypingTest = () => {
               <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground text-center select-none px-2">
                 <span className="flex items-center justify-center h-4 w-4 rounded-full border border-muted-foreground/60 text-[10px] font-bold text-muted-foreground">i</span>
                 <span>Type the text above</span>
-                <span className="text-slate-600">•</span>
+                <span className="text-muted-foreground/40">•</span>
                 <span>Current letter is highlighted</span>
-                <span className="text-slate-600">•</span>
-                <span><span className="text-[#EF4444] font-medium">Red</span> = incorrect</span>
-                <span className="text-slate-600">•</span>
+                <span className="text-muted-foreground/40">•</span>
+                <span><span className="text-rose-500 font-medium">Red</span> = incorrect</span>
+                <span className="text-muted-foreground/40">•</span>
                 <span>Keep going!</span>
               </div>
 
@@ -1151,7 +1192,7 @@ export const TypingTest = () => {
                   type="button"
                   onClick={() => restart(duration, mode, difficulty)}
                   aria-label="Restart Test"
-                  className="flex items-center justify-center gap-2.5 rounded-xl bg-[#3B82F6] hover:bg-blue-600 hover:brightness-105 text-white font-semibold py-2.5 px-8 shadow-md shadow-blue-500/20 transition-all select-none cursor-pointer"
+                  className="flex items-center justify-center gap-2.5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 px-8 shadow-md shadow-primary/20 transition-all select-none cursor-pointer"
                 >
                   <Play size={14} fill="currentColor" />
                   <span>Restart Test</span>
@@ -1160,7 +1201,7 @@ export const TypingTest = () => {
                   type="button"
                   onClick={reset}
                   aria-label="Reset Test"
-                  className="flex items-center justify-center gap-2 rounded-xl border border-[#1E293B] bg-transparent hover:bg-slate-800 hover:border-slate-600 text-slate-200 font-semibold py-2.5 px-6 transition-all select-none cursor-pointer"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card hover:bg-accent text-foreground font-semibold py-2.5 px-6 transition-all select-none cursor-pointer shadow-sm"
                 >
                   <RotateCcw size={14} />
                   <span>Reset</span>
@@ -1175,9 +1216,9 @@ export const TypingTest = () => {
             {/* 1. FOUR STATS IN 2X2 GRID */}
             <div className="grid grid-cols-2 gap-3.5">
               {/* Card 1: Time Left */}
-              <div className="card-glass rounded-2xl border border-[#1E293B] bg-[#111827] p-4 flex items-center justify-between shadow-sm transition-all duration-300 hover:border-blue-500/50 hover:shadow-[0_8px_25px_-6px_rgba(59,130,246,0.25)] cursor-default">
+              <div className="card-glass rounded-2xl border border-border/80 bg-card/70 p-4 flex items-center justify-between shadow-sm transition-all duration-300 hover:border-blue-500/50 hover:shadow-md hover:shadow-blue-500/10 cursor-default">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-500/15 text-blue-400">
+                  <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-500/15 text-blue-500 dark:text-blue-400">
                     <Clock size={18} />
                   </div>
                   <div className="min-w-0">
@@ -1191,7 +1232,7 @@ export const TypingTest = () => {
                 {/* Circular Countdown Progress Ring */}
                 <div className="relative h-8 w-8 shrink-0">
                   <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="14" fill="none" stroke="#1E293B" strokeWidth="3" />
+                    <circle cx="18" cy="18" r="14" fill="none" stroke="currentColor" className="text-muted/30" strokeWidth="3" />
                     <circle
                       cx="18"
                       cy="18"
@@ -1209,8 +1250,8 @@ export const TypingTest = () => {
               </div>
 
               {/* Card 2: WPM */}
-              <div className="card-glass rounded-2xl border border-[#1E293B] bg-[#111827] p-4 flex items-center gap-3 shadow-sm transition-all duration-300 hover:border-emerald-500/50 hover:shadow-[0_8px_25px_-6px_rgba(34,197,94,0.25)] cursor-default">
-                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-500/15 text-emerald-400">
+              <div className="card-glass rounded-2xl border border-border/80 bg-card/70 p-4 flex items-center gap-3 shadow-sm transition-all duration-300 hover:border-emerald-500/50 hover:shadow-md hover:shadow-emerald-500/10 cursor-default">
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-emerald-500/15 text-emerald-500 dark:text-emerald-400">
                   <Zap size={18} />
                 </div>
                 <div className="min-w-0">
@@ -1222,8 +1263,8 @@ export const TypingTest = () => {
               </div>
 
               {/* Card 3: Accuracy */}
-              <div className="card-glass rounded-2xl border border-[#1E293B] bg-[#111827] p-4 flex items-center gap-3 shadow-sm transition-all duration-300 hover:border-purple-500/50 hover:shadow-[0_8px_25px_-6px_rgba(168,85,247,0.25)] cursor-default">
-                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-purple-500/15 text-purple-400">
+              <div className="card-glass rounded-2xl border border-border/80 bg-card/70 p-4 flex items-center gap-3 shadow-sm transition-all duration-300 hover:border-purple-500/50 hover:shadow-md hover:shadow-purple-500/10 cursor-default">
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-purple-500/15 text-purple-500 dark:text-purple-400">
                   <Target size={18} />
                 </div>
                 <div className="min-w-0">
@@ -1235,8 +1276,8 @@ export const TypingTest = () => {
               </div>
 
               {/* Card 4: Errors */}
-              <div className="card-glass rounded-2xl border border-[#1E293B] bg-[#111827] p-4 flex items-center gap-3 shadow-sm transition-all duration-300 hover:border-red-500/50 hover:shadow-[0_8px_25px_-6px_rgba(239,68,68,0.25)] cursor-default">
-                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-red-500/15 text-red-400">
+              <div className="card-glass rounded-2xl border border-border/80 bg-card/70 p-4 flex items-center gap-3 shadow-sm transition-all duration-300 hover:border-rose-500/50 hover:shadow-md hover:shadow-rose-500/10 cursor-default">
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-rose-500/15 text-rose-500 dark:text-rose-400">
                   <XCircle size={18} />
                 </div>
                 <div className="min-w-0">
@@ -1249,9 +1290,9 @@ export const TypingTest = () => {
             </div>
 
             {/* 2. TEST SETTINGS CARD */}
-            <div className="card-glass rounded-2xl border border-[#1E293B] bg-[#111827] p-5 shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-[0_8px_25px_-6px_rgba(59,130,246,0.15)] cursor-default">
+            <div className="card-glass rounded-2xl border border-border/80 bg-card/70 p-5 shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 cursor-default">
               <div className="flex items-center gap-2 mb-4">
-                <SettingsIcon size={16} className="text-slate-300" />
+                <SettingsIcon size={16} className="text-muted-foreground" />
                 <h3 className="font-display text-sm font-bold text-foreground">Test Settings</h3>
               </div>
 
@@ -1259,10 +1300,10 @@ export const TypingTest = () => {
                 {/* Setting 1: Show Live WPM */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="grid h-6 w-6 place-items-center rounded-md border border-emerald-500/40 bg-emerald-500/10 text-emerald-400">
+                    <div className="grid h-6 w-6 place-items-center rounded-md border border-emerald-500/40 bg-emerald-500/10 text-emerald-500 dark:text-emerald-400">
                       <TrendingUp size={13} />
                     </div>
-                    <span className="text-xs sm:text-sm font-medium text-slate-200">Show Live WPM</span>
+                    <span className="text-xs sm:text-sm font-medium text-foreground">Show Live WPM</span>
                   </div>
                   <button
                     type="button"
@@ -1270,7 +1311,7 @@ export const TypingTest = () => {
                     aria-checked={showLiveWpm}
                     onClick={() => setShowLiveWpm((v) => !v)}
                     className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      showLiveWpm ? 'bg-[#0066FF]' : 'bg-slate-700'
+                      showLiveWpm ? 'bg-primary' : 'bg-muted'
                     }`}
                   >
                     <span
@@ -1284,10 +1325,10 @@ export const TypingTest = () => {
                 {/* Setting 2: Show Live Accuracy */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="grid h-6 w-6 place-items-center rounded-md border border-emerald-500/40 bg-emerald-500/10 text-emerald-400">
+                    <div className="grid h-6 w-6 place-items-center rounded-md border border-emerald-500/40 bg-emerald-500/10 text-emerald-500 dark:text-emerald-400">
                       <Target size={13} />
                     </div>
-                    <span className="text-xs sm:text-sm font-medium text-slate-200">Show Live Accuracy</span>
+                    <span className="text-xs sm:text-sm font-medium text-foreground">Show Live Accuracy</span>
                   </div>
                   <button
                     type="button"
@@ -1295,7 +1336,7 @@ export const TypingTest = () => {
                     aria-checked={showLiveAccuracy}
                     onClick={() => setShowLiveAccuracy((v) => !v)}
                     className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      showLiveAccuracy ? 'bg-[#0066FF]' : 'bg-slate-700'
+                      showLiveAccuracy ? 'bg-primary' : 'bg-muted'
                     }`}
                   >
                     <span
@@ -1309,10 +1350,10 @@ export const TypingTest = () => {
                 {/* Setting 3: Highlight Current Letter */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="grid h-6 w-6 place-items-center rounded-md border border-emerald-500/40 bg-emerald-500/10 text-emerald-400">
+                    <div className="grid h-6 w-6 place-items-center rounded-md border border-emerald-500/40 bg-emerald-500/10 text-emerald-500 dark:text-emerald-400">
                       <CheckSquare size={13} />
                     </div>
-                    <span className="text-xs sm:text-sm font-medium text-slate-200">Highlight Current Letter</span>
+                    <span className="text-xs sm:text-sm font-medium text-foreground">Highlight Current Letter</span>
                   </div>
                   <button
                     type="button"
@@ -1320,7 +1361,7 @@ export const TypingTest = () => {
                     aria-checked={highlightLetter}
                     onClick={() => setHighlightLetter((v) => !v)}
                     className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      highlightLetter ? 'bg-[#0066FF]' : 'bg-slate-700'
+                      highlightLetter ? 'bg-primary' : 'bg-muted'
                     }`}
                   >
                     <span
@@ -1334,10 +1375,10 @@ export const TypingTest = () => {
                 {/* Setting 4: Play Sound on Error */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="grid h-6 w-6 place-items-center rounded-md border border-emerald-500/40 bg-emerald-500/10 text-emerald-400">
+                    <div className="grid h-6 w-6 place-items-center rounded-md border border-emerald-500/40 bg-emerald-500/10 text-emerald-500 dark:text-emerald-400">
                       <Volume2 size={13} />
                     </div>
-                    <span className="text-xs sm:text-sm font-medium text-slate-200">Play Sound on Error</span>
+                    <span className="text-xs sm:text-sm font-medium text-foreground">Play Sound on Error</span>
                   </div>
                   <button
                     type="button"
@@ -1345,7 +1386,7 @@ export const TypingTest = () => {
                     aria-checked={soundOnError}
                     onClick={() => setSoundOnError((v) => !v)}
                     className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      soundOnError ? 'bg-[#0066FF]' : 'bg-slate-700'
+                      soundOnError ? 'bg-primary' : 'bg-muted'
                     }`}
                   >
                     <span
@@ -1359,10 +1400,10 @@ export const TypingTest = () => {
                 {/* Setting 5: Show On-screen Keyboard */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="grid h-6 w-6 place-items-center rounded-md border border-emerald-500/40 bg-emerald-500/10 text-emerald-400">
+                    <div className="grid h-6 w-6 place-items-center rounded-md border border-emerald-500/40 bg-emerald-500/10 text-emerald-500 dark:text-emerald-400">
                       <KeyboardIcon size={13} />
                     </div>
-                    <span className="text-xs sm:text-sm font-medium text-slate-200">Show On-screen Keyboard</span>
+                    <span className="text-xs sm:text-sm font-medium text-foreground">Show On-screen Keyboard</span>
                   </div>
                   <button
                     type="button"
@@ -1370,7 +1411,7 @@ export const TypingTest = () => {
                     aria-checked={showKeyboard}
                     onClick={() => setShowKeyboard((v) => !v)}
                     className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      showKeyboard ? 'bg-[#0066FF]' : 'bg-slate-700'
+                      showKeyboard ? 'bg-primary' : 'bg-muted'
                     }`}
                   >
                     <span
@@ -1384,12 +1425,12 @@ export const TypingTest = () => {
             </div>
 
             {/* 3. PRO TIP CARD */}
-            <div className="card-glass rounded-2xl border border-[#1E293B] bg-[#111827] p-5 shadow-sm transition-all duration-300 hover:border-amber-500/50 hover:shadow-[0_8px_25px_-6px_rgba(245,158,11,0.2)] cursor-default">
-              <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
-                <Lightbulb size={18} className="text-amber-400 fill-amber-400" />
+            <div className="card-glass rounded-2xl border border-border/80 bg-card/70 p-5 shadow-sm transition-all duration-300 hover:border-amber-500/50 hover:shadow-md hover:shadow-amber-500/10 cursor-default">
+              <div className="flex items-center gap-2 text-amber-500 dark:text-amber-400 font-bold text-sm">
+                <Lightbulb size={18} className="text-amber-500 dark:text-amber-400 fill-amber-500/20" />
                 <span className="font-display font-bold text-foreground">Pro Tip</span>
               </div>
-              <p className="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed">
+              <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 Keep your posture straight, relax your hands, and focus on accuracy. Speed will come naturally!
               </p>
             </div>
@@ -1402,6 +1443,13 @@ export const TypingTest = () => {
         isOpen={isCustomModalOpen}
         onClose={() => setIsCustomModalOpen(false)}
         onApplyCustomText={handleApplyCustomText}
+      />
+
+      {/* AI Prompt & Code Generator Modal */}
+      <AIPromptModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        onApplyText={handleApplyAiText}
       />
     </div>
   );

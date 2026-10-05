@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Clock, Type, Quote, SlidersHorizontal, Play } from 'lucide-react';
+import { Clock, Type, Quote, SlidersHorizontal, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import SEO from '../components/common/SEO';
 import { useTypingContext } from '../context/TypingContext';
 import CustomTextModal from '../components/typing/CustomTextModal';
@@ -66,6 +66,8 @@ export const Practice = () => {
   const [customModalOpen, setCustomModalOpen] = useState(false);
   const [recentSessions, setRecentSessions] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -91,6 +93,12 @@ export const Practice = () => {
     };
     fetchHistory();
   }, []);
+
+  const totalPages = Math.max(1, Math.ceil(recentSessions.length / pageSize));
+  const paginatedSessions = recentSessions.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const handleStartMode = (modeType) => {
     if (modeType === 'custom') {
@@ -157,12 +165,20 @@ export const Practice = () => {
           })}
         </div>
 
-        {/* Recent Practice List */}
-        <h2 className="mt-12 font-display text-xl font-bold">Recent Practice</h2>
+        {/* Recent Practice List with Header Stats */}
+        <div className="mt-12 flex items-center justify-between">
+          <h2 className="font-display text-xl font-bold">Recent Practice</h2>
+          {recentSessions.length > 0 && (
+            <span className="text-xs text-muted-foreground">
+              Total {recentSessions.length} session{recentSessions.length > 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
+
         <div className="card-glass group mt-4 divide-y divide-border rounded-2xl border border-border/80 transition-all duration-300 hover:border-blue-500/40 hover:shadow-[0_10px_25px_-5px_rgba(59,130,246,0.15)] overflow-hidden">
-          {recentSessions.length > 0 ? (
-            recentSessions.map((item) => (
-              <div key={item.id} className="flex items-center justify-between gap-4 p-4 hover:bg-white/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+          {paginatedSessions.length > 0 ? (
+            paginatedSessions.map((item) => (
+              <div key={item.id} className="flex items-center justify-between gap-4 p-4 hover:bg-muted/40 transition-colors">
                 <div className="flex min-w-0 items-center gap-3">
                   <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-colors icon-box-practice">
                     <Clock size={17} aria-hidden="true" />
@@ -178,6 +194,60 @@ export const Practice = () => {
           ) : (
             <div className="p-8 text-center text-sm text-muted-foreground">
               {loadingHistory ? 'Loading your practice history...' : 'No practice sessions recorded yet. Start practicing above to build muscle memory!'}
+            </div>
+          )}
+
+          {/* Integrated Table Card Footer Pagination */}
+          {recentSessions.length > pageSize && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-muted/20 dark:bg-slate-950/40 select-none">
+              <p className="text-xs text-muted-foreground">
+                Showing <span className="font-semibold text-foreground">{(currentPage - 1) * pageSize + 1}</span> to{' '}
+                <span className="font-semibold text-foreground">
+                  {Math.min(currentPage * pageSize, recentSessions.length)}
+                </span>{' '}
+                of <span className="font-semibold text-foreground">{recentSessions.length}</span> sessions
+              </p>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="flex h-8 items-center gap-1 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground hover:bg-accent disabled:opacity-40 disabled:pointer-events-none transition-colors shadow-sm"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft size={14} />
+                  <span>Prev</span>
+                </button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() => setCurrentPage(page)}
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold transition-all ${
+                        currentPage === page
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'border border-border bg-card text-muted-foreground hover:bg-accent hover:text-foreground'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="flex h-8 items-center gap-1 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground hover:bg-accent disabled:opacity-40 disabled:pointer-events-none transition-colors shadow-sm"
+                  aria-label="Next page"
+                >
+                  <span>Next</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
             </div>
           )}
         </div>

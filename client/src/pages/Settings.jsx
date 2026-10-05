@@ -27,7 +27,7 @@ import SEO from '../components/common/SEO';
 import { useSettings } from '../context/SettingsContext';
 import { useAuth } from '../context/AuthContext';
 import { profileService } from '../services/profileService';
-import { soundEngine } from '../utils/soundEngine';
+import { soundEngine, SOUNDPACKS } from '../utils/soundEngine';
 
 const ACCENT_COLORS = [
   { name: 'Blue', hex: '#3B82F6' },
@@ -54,8 +54,8 @@ function ToggleSwitch({ checked, onChange, ariaLabel }) {
         e.stopPropagation();
         onChange(!checked);
       }}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#0B1220] ${
-        checked ? 'bg-[#0066FF]' : 'bg-slate-700'
+      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${
+        checked ? 'bg-primary' : 'bg-muted-foreground/30'
       }`}
     >
       <span
@@ -202,7 +202,7 @@ export const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#06090F] text-slate-100 selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen w-full bg-background text-foreground transition-colors duration-200 selection:bg-primary selection:text-primary-foreground">
       <SEO
         title="Settings — Tara Typing"
         description="Customize your Tara Typing appearance, sound, typing preferences, and account settings."
@@ -213,29 +213,29 @@ export const Settings = () => {
             {/* Top Header Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
               <div className="flex items-center gap-3.5">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600/20 text-[#0066FF]">
-                  <SettingsIcon size={24} className="text-[#0066FF]" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <SettingsIcon size={24} className="text-primary" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2.5">
-                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
                       Settings
                     </h1>
                     {(loading || isSyncing) && (
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20 animate-pulse">
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20 animate-pulse">
                         <Loader2 size={11} className="animate-spin" />
                         {loading ? 'Syncing...' : 'Saving...'}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-400">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Customize your Tara Typing experience
                   </p>
                 </div>
               </div>
 
               {/* Quote Card with Continuous Nonstop Rotating Border Lighting */}
-              <div className="relative overflow-hidden rounded-2xl p-[1.5px] max-w-sm shadow-[0_0_25px_-5px_rgba(0,102,255,0.35)]">
+              <div className="relative overflow-hidden rounded-2xl p-[1.5px] max-w-sm shadow-sm">
                 {/* Continuous Nonstop Rotating Light Beam */}
                 <div
                   className="absolute inset-[-200%] animate-[spin_3s_linear_infinite] pointer-events-none"
@@ -245,13 +245,13 @@ export const Settings = () => {
                 />
                 
                 {/* Inner Content Card */}
-                <div className="relative flex items-start gap-2.5 rounded-[15px] bg-[#0A101D] px-4 py-2.5 backdrop-blur-md">
-                  <span className="text-xl font-serif text-[#0066FF] leading-none select-none">“</span>
+                <div className="relative flex items-start gap-2.5 rounded-[15px] bg-card px-4 py-2.5 backdrop-blur-md">
+                  <span className="text-xl font-serif text-primary leading-none select-none">“</span>
                   <div>
-                    <p className="text-xs text-slate-200 italic font-medium">
+                    <p className="text-xs text-foreground/90 italic font-medium">
                       "Better settings, better practice, better you."
                     </p>
-                    <p className="text-[11px] font-semibold text-[#0066FF] mt-0.5">
+                    <p className="text-[11px] font-semibold text-primary mt-0.5">
                       — Tara Typing
                     </p>
                   </div>
@@ -267,15 +267,15 @@ export const Settings = () => {
                 {/* 1. APPEARANCE CARD (Purple Glow Hover) */}
                 <section
                   id="appearance"
-                  className="group relative rounded-2xl border border-slate-800/80 bg-[#0B1220]/90 p-5 sm:p-6 shadow-xl backdrop-blur-sm space-y-5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-purple-500/50 hover:shadow-[0_12px_30px_-6px_rgba(168,85,247,0.25)] hover:bg-gradient-to-b hover:from-[#13112E] hover:to-[#0B1220]"
+                  className="group relative rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm backdrop-blur-sm space-y-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-purple-500/50 hover:shadow-lg"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-500/10 text-purple-400 group-hover:scale-110 group-hover:bg-purple-500/20 group-hover:text-purple-300 transition-all duration-300">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-500/10 text-purple-500 dark:text-purple-400 group-hover:scale-110 transition-all duration-300">
                       <Palette size={20} />
                     </div>
                     <div>
-                      <h2 className="text-base font-semibold text-white group-hover:text-purple-200 transition-colors">Appearance</h2>
-                      <p className="text-xs text-slate-400">Personalize your accent color and dashboard theme</p>
+                      <h2 className="text-base font-semibold text-foreground group-hover:text-purple-500 dark:group-hover:text-purple-200 transition-colors">Appearance</h2>
+                      <p className="text-xs text-muted-foreground">Personalize your accent color and dashboard theme</p>
                     </div>
                   </div>
 
@@ -283,10 +283,10 @@ export const Settings = () => {
                     {/* Accent Color picker */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3">
                       <div className="flex items-center gap-3">
-                        <Target size={17} className="text-slate-400 shrink-0 group-hover:text-purple-400 transition-colors" />
+                        <Target size={17} className="text-muted-foreground shrink-0 group-hover:text-purple-500 transition-colors" />
                         <div>
-                          <div className="text-sm font-medium text-slate-200">Accent Color</div>
-                          <div className="text-xs text-slate-400">Choose your preferred accent color</div>
+                          <div className="text-sm font-medium text-foreground">Accent Color</div>
+                          <div className="text-xs text-muted-foreground">Choose your preferred accent color</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2.5">
@@ -298,9 +298,9 @@ export const Settings = () => {
                               type="button"
                               onClick={() => handleSetAccentColor(col.hex)}
                               title={col.name}
-                              className={`h-7 w-7 rounded-full transition-transform hover:scale-125 focus:outline-none ${
+                              className={`h-7 w-7 rounded-full transition-transform hover:scale-125 focus:outline-none cursor-pointer ${
                                 isSelected
-                                  ? 'ring-2 ring-offset-2 ring-white ring-offset-[#0B1220] scale-110 shadow-lg'
+                                  ? 'ring-2 ring-offset-2 ring-primary ring-offset-card scale-110 shadow-lg'
                                   : 'opacity-80 hover:opacity-100'
                               }`}
                               style={{ backgroundColor: col.hex }}
@@ -315,30 +315,30 @@ export const Settings = () => {
                 {/* 2. SOUND CARD (Cyan Glow Hover) */}
                 <section
                   id="sound"
-                  className="group relative rounded-2xl border border-slate-800/80 bg-[#0B1220]/90 p-5 sm:p-6 shadow-xl backdrop-blur-sm space-y-5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-cyan-500/50 hover:shadow-[0_12px_30px_-6px_rgba(6,182,212,0.25)] hover:bg-gradient-to-b hover:from-[#091D2C] hover:to-[#0B1220]"
+                  className="group relative rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm backdrop-blur-sm space-y-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-cyan-500/50 hover:shadow-lg"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400 group-hover:scale-110 group-hover:bg-cyan-500/20 group-hover:text-cyan-300 transition-all duration-300">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-500 dark:text-cyan-400 group-hover:scale-110 transition-all duration-300">
                       <Volume2 size={20} />
                     </div>
                     <div>
-                      <h2 className="text-base font-semibold text-white group-hover:text-cyan-200 transition-colors">Sound Effects</h2>
-                      <p className="text-xs text-slate-400">Control audio feedback during typing tests</p>
+                      <h2 className="text-base font-semibold text-foreground group-hover:text-cyan-500 dark:group-hover:text-cyan-200 transition-colors">Sound Effects</h2>
+                      <p className="text-xs text-muted-foreground">Control audio feedback during typing tests</p>
                     </div>
                   </div>
 
-                  <div className="divide-y divide-slate-800/60 pt-1">
+                  <div className="divide-y divide-border pt-1">
                     
                     {/* Keypress Sound */}
                     <div
                       onClick={() => handleToggleKeypressSound(!isKeypressSoundOn)}
-                      className="flex items-center justify-between gap-3 py-3.5 first:pt-2 cursor-pointer select-none hover:bg-white/[0.04] px-2 -mx-2 rounded-xl transition-colors"
+                      className="flex items-center justify-between gap-3 py-3.5 first:pt-2 cursor-pointer select-none hover:bg-muted/40 px-2 -mx-2 rounded-xl transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <Volume1 size={17} className="text-slate-400 shrink-0 group-hover:text-cyan-400 transition-colors" />
+                        <Volume1 size={17} className="text-muted-foreground shrink-0 group-hover:text-cyan-500 transition-colors" />
                         <div>
-                          <div className="text-sm font-medium text-slate-200">Keypress Sound</div>
-                          <div className="text-xs text-slate-400">Tactile mechanical sound on each keystroke</div>
+                          <div className="text-sm font-medium text-foreground">Keypress Sound</div>
+                          <div className="text-xs text-muted-foreground">Tactile mechanical sound on each keystroke</div>
                         </div>
                       </div>
                       <ToggleSwitch
@@ -351,13 +351,13 @@ export const Settings = () => {
                     {/* Error Sound */}
                     <div
                       onClick={() => handleToggleErrorSound(!isErrorSoundOn)}
-                      className="flex items-center justify-between gap-3 py-3.5 cursor-pointer select-none hover:bg-white/[0.04] px-2 -mx-2 rounded-xl transition-colors"
+                      className="flex items-center justify-between gap-3 py-3.5 cursor-pointer select-none hover:bg-muted/40 px-2 -mx-2 rounded-xl transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <AlertCircle size={17} className="text-red-400 shrink-0" />
+                        <AlertCircle size={17} className="text-rose-500 shrink-0" />
                         <div>
-                          <div className="text-sm font-medium text-slate-200">Error Sound</div>
-                          <div className="text-xs text-slate-400">Audio alert when typing an incorrect character</div>
+                          <div className="text-sm font-medium text-foreground">Error Sound</div>
+                          <div className="text-xs text-muted-foreground">Audio alert when typing an incorrect character</div>
                         </div>
                       </div>
                       <ToggleSwitch
@@ -370,14 +370,14 @@ export const Settings = () => {
                     {/* Volume Slider */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-4">
                       <div className="flex items-center gap-3">
-                        <Volume2 size={17} className="text-slate-400 shrink-0 group-hover:text-cyan-400 transition-colors" />
+                        <Volume2 size={17} className="text-muted-foreground shrink-0 group-hover:text-cyan-500 transition-colors" />
                         <div>
-                          <div className="text-sm font-medium text-slate-200">Volume</div>
-                          <div className="text-xs text-slate-400">Adjust sound effects volume</div>
+                          <div className="text-sm font-medium text-foreground">Volume</div>
+                          <div className="text-xs text-muted-foreground">Adjust sound effects volume</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 min-w-[200px]">
-                        <Volume2 size={16} className="text-slate-400 shrink-0" />
+                        <Volume2 size={16} className="text-muted-foreground shrink-0" />
                         <input
                           type="range"
                           min="0"
@@ -386,11 +386,56 @@ export const Settings = () => {
                           onChange={handleVolumeChange}
                           onMouseUp={handleVolumeMouseUp}
                           onTouchEnd={handleVolumeMouseUp}
-                          className="w-full accent-cyan-500 h-1.5 bg-slate-700 rounded-lg cursor-pointer"
+                          className="w-full accent-cyan-500 h-1.5 bg-muted rounded-lg cursor-pointer"
                         />
-                        <span className="text-xs font-medium text-slate-300 w-9 text-right tabular-nums">
+                        <span className="text-xs font-medium text-foreground w-9 text-right tabular-nums">
                           {currentVolume}%
                         </span>
+                      </div>
+                    </div>
+
+                    {/* Switch Soundpacks Selection */}
+                    <div className="pt-3">
+                      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2.5">
+                        Mechanical Switch Soundpacks
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {SOUNDPACKS.map((sp) => {
+                          const active = (settings?.soundType || 'mechanical') === sp.id;
+                          return (
+                            <div
+                              key={sp.id}
+                              onClick={() => {
+                                updateSetting('soundType', sp.id);
+                                soundEngine.soundType = sp.id;
+                                soundEngine.playKeypress(sp.id);
+                              }}
+                              className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                                active
+                                  ? 'border-cyan-500 bg-cyan-500/15 shadow-sm'
+                                  : 'border-border bg-muted/40 hover:bg-muted'
+                              }`}
+                            >
+                              <div className="min-w-0">
+                                <p className={`text-xs font-semibold truncate leading-tight ${active ? 'text-cyan-600 dark:text-cyan-300 font-bold' : 'text-foreground'}`}>
+                                  {sp.name}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground truncate mt-0.5">{sp.desc}</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  soundEngine.playKeypress(sp.id);
+                                }}
+                                title="Preview sound"
+                                className="h-6 w-6 grid place-items-center rounded-lg bg-muted hover:bg-cyan-500/20 text-muted-foreground hover:text-cyan-600 dark:hover:text-cyan-300 border border-border text-xs shrink-0 transition-colors cursor-pointer"
+                              >
+                                ▶
+                              </button>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -400,34 +445,34 @@ export const Settings = () => {
                 {/* 3. ACCOUNT CARD (Emerald Glow Hover) */}
                 <section
                   id="account"
-                  className="group relative rounded-2xl border border-slate-800/80 bg-[#0B1220]/90 p-5 sm:p-6 shadow-xl backdrop-blur-sm space-y-5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-emerald-500/50 hover:shadow-[0_12px_30px_-6px_rgba(16,185,129,0.25)] hover:bg-gradient-to-b hover:from-[#09221C] hover:to-[#0B1220]"
+                  className="group relative rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm backdrop-blur-sm space-y-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-emerald-500/50 hover:shadow-lg"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500/20 group-hover:text-emerald-300 transition-all duration-300">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 group-hover:scale-110 transition-all duration-300">
                       <User size={20} />
                     </div>
                     <div>
-                      <h2 className="text-base font-semibold text-white group-hover:text-emerald-200 transition-colors">Account Details</h2>
-                      <p className="text-xs text-slate-400">Manage profile and credentials</p>
+                      <h2 className="text-base font-semibold text-foreground group-hover:text-emerald-500 dark:group-hover:text-emerald-200 transition-colors">Account Details</h2>
+                      <p className="text-xs text-muted-foreground">Manage profile and credentials</p>
                     </div>
                   </div>
 
                   <div className="pt-1">
                     {user ? (
-                      <div className="divide-y divide-slate-800/60">
+                      <div className="divide-y divide-border">
                         {/* Full Name & Username */}
                         <div className="flex items-center justify-between gap-3 py-3.5 first:pt-2">
                           <div className="flex items-center gap-3">
-                            <User size={17} className="text-slate-400 shrink-0 group-hover:text-emerald-400 transition-colors" />
+                            <User size={17} className="text-muted-foreground shrink-0 group-hover:text-emerald-500 transition-colors" />
                             <div>
-                              <span className="text-sm font-medium text-slate-200 block">Name</span>
-                              <span className="text-xs text-slate-400 block">
+                              <span className="text-sm font-medium text-foreground block">Name</span>
+                              <span className="text-xs text-muted-foreground block">
                                 @{user.username}
                               </span>
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className="text-xs sm:text-sm text-slate-300 font-medium">
+                            <span className="text-xs sm:text-sm text-foreground font-medium">
                               {user.name}
                             </span>
                             <button
@@ -437,7 +482,7 @@ export const Settings = () => {
                                 setEditUserUsername(user.username || '');
                                 setIsEditUserModalOpen(true);
                               }}
-                              className="rounded-lg border border-slate-700/80 bg-slate-800/40 px-3 py-1 text-xs font-medium text-slate-200 hover:border-emerald-500/60 hover:bg-emerald-500/15 hover:text-emerald-300 transition-colors"
+                              className="rounded-lg border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-foreground hover:border-emerald-500 hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors cursor-pointer"
                             >
                               Edit
                             </button>
@@ -447,10 +492,10 @@ export const Settings = () => {
                         {/* Email */}
                         <div className="flex items-center justify-between gap-3 py-3.5">
                           <div className="flex items-center gap-3">
-                            <Mail size={17} className="text-slate-400 shrink-0 group-hover:text-emerald-400 transition-colors" />
-                            <span className="text-sm font-medium text-slate-200">Email</span>
+                            <Mail size={17} className="text-muted-foreground shrink-0 group-hover:text-emerald-500 transition-colors" />
+                            <span className="text-sm font-medium text-foreground">Email</span>
                           </div>
-                          <span className="text-xs sm:text-sm text-slate-400 font-mono">
+                          <span className="text-xs sm:text-sm text-muted-foreground font-mono">
                             {user.email}
                           </span>
                         </div>
@@ -458,17 +503,17 @@ export const Settings = () => {
                         {/* Password */}
                         <div className="flex items-center justify-between gap-3 py-3.5">
                           <div className="flex items-center gap-3">
-                            <Lock size={17} className="text-slate-400 shrink-0 group-hover:text-emerald-400 transition-colors" />
-                            <span className="text-sm font-medium text-slate-200">Password</span>
+                            <Lock size={17} className="text-muted-foreground shrink-0 group-hover:text-emerald-500 transition-colors" />
+                            <span className="text-sm font-medium text-foreground">Password</span>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className="text-xs sm:text-sm text-slate-400 tracking-widest font-mono">
+                            <span className="text-xs sm:text-sm text-muted-foreground tracking-widest font-mono">
                               ••••••••
                             </span>
                             <button
                               type="button"
                               onClick={() => setIsPasswordModalOpen(true)}
-                              className="rounded-lg border border-slate-700/80 bg-slate-800/40 px-3 py-1 text-xs font-medium text-slate-200 hover:border-emerald-500/60 hover:bg-emerald-500/15 hover:text-emerald-300 transition-colors"
+                              className="rounded-lg border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-foreground hover:border-emerald-500 hover:bg-emerald-500/15 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors cursor-pointer"
                             >
                               Change
                             </button>
@@ -477,12 +522,12 @@ export const Settings = () => {
                       </div>
                     ) : (
                       <div className="py-6 text-center space-y-3">
-                        <p className="text-xs text-slate-400 leading-relaxed max-w-xs mx-auto">
+                        <p className="text-xs text-muted-foreground leading-relaxed max-w-xs mx-auto">
                           Sign in to link and automatically sync your typing settings across all devices.
                         </p>
                         <Link
                           to="/login"
-                          className="inline-flex items-center gap-2 rounded-xl bg-[#0066FF] px-4 py-2 text-xs font-semibold text-white shadow-md hover:bg-blue-600 transition-colors"
+                          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-md hover:bg-primary/90 transition-colors"
                         >
                           Sign In
                         </Link>
@@ -499,29 +544,29 @@ export const Settings = () => {
                 {/* 4. TYPING PREFERENCES CARD (Cobalt Performance Glow) */}
                 <section
                   id="typing"
-                  className="group relative rounded-2xl border border-slate-800/80 bg-[#0B1220]/90 p-5 sm:p-6 shadow-xl backdrop-blur-sm space-y-5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-blue-500/50 hover:shadow-[0_16px_36px_-6px_rgba(0,102,255,0.25)] hover:bg-gradient-to-b hover:from-[#081530] hover:to-[#0B1220]"
+                  className="group relative rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm backdrop-blur-sm space-y-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-blue-500/50 hover:shadow-lg"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 text-[#0066FF] group-hover:scale-110 group-hover:bg-blue-500/20 group-hover:text-blue-300 transition-all duration-300">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:scale-110 transition-all duration-300">
                       <Keyboard size={20} />
                     </div>
                     <div>
-                      <h2 className="text-base font-semibold text-white group-hover:text-blue-200 transition-colors">Typing Preferences</h2>
-                      <p className="text-xs text-slate-400">Configure your typing speed test parameters</p>
+                      <h2 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">Typing Preferences</h2>
+                      <p className="text-xs text-muted-foreground">Configure your typing speed test parameters</p>
                     </div>
                   </div>
 
                   <div className="pt-2">
                     {/* Top sub-grid: Duration, Mode, Caret Style, Font Size */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-5 border-b border-slate-800/60">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-5 border-b border-border">
                       
                       {/* Default Duration */}
-                      <div className="flex flex-col gap-2 p-3 rounded-xl bg-slate-900/40 border border-slate-800/50 hover:border-blue-500/40 hover:bg-slate-800/50 transition-all duration-200 hover:-translate-y-0.5">
+                      <div className="flex flex-col gap-2 p-3 rounded-xl bg-muted/30 border border-border hover:border-primary/40 hover:bg-muted/60 transition-all duration-200">
                         <div className="flex items-center gap-2">
-                          <Clock size={16} className="text-slate-400" />
-                          <span className="text-xs font-medium text-slate-300">Default Duration</span>
+                          <Clock size={16} className="text-muted-foreground" />
+                          <span className="text-xs font-medium text-foreground">Default Duration</span>
                         </div>
-                        <div className="inline-flex rounded-xl border border-slate-800 bg-[#070B14] p-1 w-full justify-between">
+                        <div className="inline-flex rounded-xl border border-border bg-background p-1 w-full justify-between">
                           {[15, 30, 60, 120].map((d) => {
                             const isSelected = (settings?.defaultDuration ?? 30) === d;
                             return (
@@ -529,10 +574,10 @@ export const Settings = () => {
                                 key={d}
                                 type="button"
                                 onClick={() => updateSetting('defaultDuration', d)}
-                                className={`flex-1 rounded-lg py-1.5 text-xs font-medium transition-all select-none text-center ${
+                                className={`flex-1 rounded-lg py-1.5 text-xs font-medium transition-all select-none text-center cursor-pointer ${
                                   isSelected
-                                    ? 'bg-[#0066FF] text-white shadow-sm'
-                                    : 'text-slate-400 hover:text-slate-200'
+                                    ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
                                 }`}
                               >
                                 {d}s
@@ -543,12 +588,12 @@ export const Settings = () => {
                       </div>
 
                       {/* Default Mode */}
-                      <div className="flex flex-col gap-2 p-3 rounded-xl bg-slate-900/40 border border-slate-800/50 hover:border-blue-500/40 hover:bg-slate-800/50 transition-all duration-200 hover:-translate-y-0.5">
+                      <div className="flex flex-col gap-2 p-3 rounded-xl bg-muted/30 border border-border hover:border-primary/40 hover:bg-muted/60 transition-all duration-200">
                         <div className="flex items-center gap-2">
-                          <FileText size={16} className="text-slate-400" />
-                          <span className="text-xs font-medium text-slate-300">Default Mode</span>
+                          <FileText size={16} className="text-muted-foreground" />
+                          <span className="text-xs font-medium text-foreground">Default Mode</span>
                         </div>
-                        <div className="inline-flex rounded-xl border border-slate-800 bg-[#070B14] p-1 w-full justify-between">
+                        <div className="inline-flex rounded-xl border border-border bg-background p-1 w-full justify-between">
                           {['words', 'quote', 'custom'].map((mode) => {
                             const isSelected = (settings?.defaultMode ?? 'words') === mode;
                             return (
@@ -556,10 +601,10 @@ export const Settings = () => {
                                 key={mode}
                                 type="button"
                                 onClick={() => updateSetting('defaultMode', mode)}
-                                className={`flex-1 capitalize rounded-lg py-1.5 text-xs font-medium transition-all select-none text-center ${
+                                className={`flex-1 capitalize rounded-lg py-1.5 text-xs font-medium transition-all select-none text-center cursor-pointer ${
                                   isSelected
-                                    ? 'bg-[#0066FF] text-white shadow-sm'
-                                    : 'text-slate-400 hover:text-slate-200'
+                                    ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
                                 }`}
                               >
                                 {mode}
@@ -570,12 +615,12 @@ export const Settings = () => {
                       </div>
 
                       {/* Caret Style */}
-                      <div className="flex flex-col gap-2 p-3 rounded-xl bg-slate-900/40 border border-slate-800/50 hover:border-blue-500/40 hover:bg-slate-800/50 transition-all duration-200 hover:-translate-y-0.5">
+                      <div className="flex flex-col gap-2 p-3 rounded-xl bg-muted/30 border border-border hover:border-primary/40 hover:bg-muted/60 transition-all duration-200">
                         <div className="flex items-center gap-2">
-                          <Sliders size={16} className="text-slate-400" />
-                          <span className="text-xs font-medium text-slate-300">Caret Style</span>
+                          <Sliders size={16} className="text-muted-foreground" />
+                          <span className="text-xs font-medium text-foreground">Caret Style</span>
                         </div>
-                        <div className="inline-flex rounded-xl border border-slate-800 bg-[#070B14] p-1 w-full justify-between">
+                        <div className="inline-flex rounded-xl border border-border bg-background p-1 w-full justify-between">
                           {['line', 'block', 'underline'].map((c) => {
                             const isSelected = (settings?.caretStyle ?? 'line') === c;
                             return (
@@ -583,10 +628,10 @@ export const Settings = () => {
                                 key={c}
                                 type="button"
                                 onClick={() => updateSetting('caretStyle', c)}
-                                className={`flex-1 capitalize rounded-lg py-1.5 text-xs font-medium transition-all select-none text-center ${
+                                className={`flex-1 capitalize rounded-lg py-1.5 text-xs font-medium transition-all select-none text-center cursor-pointer ${
                                   isSelected
-                                    ? 'bg-[#0066FF] text-white shadow-sm'
-                                    : 'text-slate-400 hover:text-slate-200'
+                                    ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
                                 }`}
                               >
                                 {c}
@@ -597,12 +642,12 @@ export const Settings = () => {
                       </div>
 
                       {/* Font Size */}
-                      <div className="flex flex-col gap-2 p-3 rounded-xl bg-slate-900/40 border border-slate-800/50 hover:border-blue-500/40 hover:bg-slate-800/50 transition-all duration-200 hover:-translate-y-0.5">
+                      <div className="flex flex-col gap-2 p-3 rounded-xl bg-muted/30 border border-border hover:border-primary/40 hover:bg-muted/60 transition-all duration-200">
                         <div className="flex items-center gap-2">
-                          <Type size={16} className="text-slate-400" />
-                          <span className="text-xs font-medium text-slate-300">Font Size</span>
+                          <Type size={16} className="text-muted-foreground" />
+                          <span className="text-xs font-medium text-foreground">Font Size</span>
                         </div>
-                        <div className="inline-flex rounded-xl border border-slate-800 bg-[#070B14] p-1 w-full justify-between">
+                        <div className="inline-flex rounded-xl border border-border bg-background p-1 w-full justify-between">
                           {['small', 'medium', 'large'].map((fs) => {
                             const isSelected = (settings?.fontSize ?? 'medium') === fs;
                             return (
@@ -610,10 +655,10 @@ export const Settings = () => {
                                 key={fs}
                                 type="button"
                                 onClick={() => updateSetting('fontSize', fs)}
-                                className={`flex-1 capitalize rounded-lg py-1.5 text-xs font-medium transition-all select-none text-center ${
+                                className={`flex-1 capitalize rounded-lg py-1.5 text-xs font-medium transition-all select-none text-center cursor-pointer ${
                                   isSelected
-                                    ? 'bg-[#0066FF] text-white shadow-sm'
-                                    : 'text-slate-400 hover:text-slate-200'
+                                    ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
                                 }`}
                               >
                                 {fs}
@@ -631,13 +676,13 @@ export const Settings = () => {
                       {/* Show Live WPM */}
                       <div
                         onClick={() => updateSetting('showLiveWpm', !(settings?.showLiveWpm ?? settings?.liveWpm ?? true))}
-                        className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900/30 border border-slate-800/50 cursor-pointer select-none hover:border-blue-500/40 hover:bg-blue-950/20 hover:scale-[1.01] transition-all duration-200"
+                        className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-muted/30 border border-border cursor-pointer select-none hover:border-primary/40 hover:bg-muted/60 transition-all duration-200"
                       >
                         <div className="flex items-center gap-3">
-                          <TrendingUp size={17} className="text-slate-400 shrink-0 group-hover:text-blue-400 transition-colors" />
+                          <TrendingUp size={17} className="text-muted-foreground shrink-0 group-hover:text-primary transition-colors" />
                           <div>
-                            <div className="text-sm font-medium text-slate-200">Show Live WPM</div>
-                            <div className="text-xs text-slate-400">Display words-per-minute in real-time</div>
+                            <div className="text-sm font-medium text-foreground">Show Live WPM</div>
+                            <div className="text-xs text-muted-foreground">Display words-per-minute in real-time</div>
                           </div>
                         </div>
                         <ToggleSwitch
@@ -650,13 +695,13 @@ export const Settings = () => {
                       {/* Show Live Accuracy */}
                       <div
                         onClick={() => updateSetting('showLiveAccuracy', !(settings?.showLiveAccuracy ?? settings?.showAccuracy ?? true))}
-                        className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900/30 border border-slate-800/50 cursor-pointer select-none hover:border-cyan-500/40 hover:bg-cyan-950/20 hover:scale-[1.01] transition-all duration-200"
+                        className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-muted/30 border border-border cursor-pointer select-none hover:border-cyan-500/40 hover:bg-muted/60 transition-all duration-200"
                       >
                         <div className="flex items-center gap-3">
-                          <Target size={17} className="text-slate-400 shrink-0 group-hover:text-cyan-400 transition-colors" />
+                          <Target size={17} className="text-muted-foreground shrink-0 group-hover:text-cyan-500 transition-colors" />
                           <div>
-                            <div className="text-sm font-medium text-slate-200">Show Live Accuracy</div>
-                            <div className="text-xs text-slate-400">Display accuracy % counter while typing</div>
+                            <div className="text-sm font-medium text-foreground">Show Live Accuracy</div>
+                            <div className="text-xs text-muted-foreground">Display accuracy % counter while typing</div>
                           </div>
                         </div>
                         <ToggleSwitch
@@ -669,13 +714,13 @@ export const Settings = () => {
                       {/* Highlight Mistakes */}
                       <div
                         onClick={() => updateSetting('highlightMistakes', !(settings?.highlightMistakes ?? true))}
-                        className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900/30 border border-slate-800/50 cursor-pointer select-none hover:border-red-500/40 hover:bg-red-950/20 hover:scale-[1.01] transition-all duration-200"
+                        className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-muted/30 border border-border cursor-pointer select-none hover:border-rose-500/40 hover:bg-muted/60 transition-all duration-200"
                       >
                         <div className="flex items-center gap-3">
-                          <span className="flex h-4 w-4 items-center justify-center font-bold text-xs text-red-400">!</span>
+                          <span className="flex h-4 w-4 items-center justify-center font-bold text-xs text-rose-500">!</span>
                           <div>
-                            <div className="text-sm font-medium text-slate-200">Highlight Mistakes</div>
-                            <div className="text-xs text-slate-400">Red highlight on mistyped characters</div>
+                            <div className="text-sm font-medium text-foreground">Highlight Mistakes</div>
+                            <div className="text-xs text-muted-foreground">Red highlight on mistyped characters</div>
                           </div>
                         </div>
                         <ToggleSwitch
@@ -697,16 +742,16 @@ export const Settings = () => {
             <div className="w-full">
               <section
                 id="reset-settings"
-                className="group relative rounded-2xl border border-slate-800/80 bg-[#0B1220]/90 p-5 sm:p-6 shadow-xl backdrop-blur-sm transition-all duration-300 ease-out hover:border-slate-700/80"
+                className="group relative rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-sm backdrop-blur-sm transition-all duration-300 ease-out hover:border-border"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800 text-slate-400 group-hover:text-slate-200 transition-colors">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors">
                       <RotateCcw size={18} />
                     </div>
                     <div>
-                      <h2 className="text-base font-semibold text-white">Reset Settings</h2>
-                      <p className="text-xs text-slate-400">
+                      <h2 className="text-base font-semibold text-foreground">Reset Settings</h2>
+                      <p className="text-xs text-muted-foreground">
                         Restore all typing, sound and appearance settings to their default values.
                       </p>
                     </div>
@@ -714,7 +759,7 @@ export const Settings = () => {
                   <button
                     type="button"
                     onClick={() => setIsResetModalOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700/80 bg-slate-800/60 px-4 py-2.5 text-xs font-semibold text-slate-200 hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-blue-300 transition-all duration-200 focus:outline-none shrink-0"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-muted/60 px-4 py-2.5 text-xs font-semibold text-foreground hover:bg-accent hover:border-border transition-all duration-200 focus:outline-none shrink-0 cursor-pointer"
                   >
                     <RotateCcw size={14} />
                     <span>Reset to Default</span>
@@ -730,20 +775,20 @@ export const Settings = () => {
       {/* ============================================================ */}
       {isEditUserModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-[#0B1220] p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-              <h3 className="text-lg font-bold text-white">Edit Profile Details</h3>
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between pb-4 border-b border-border">
+              <h3 className="text-lg font-bold text-foreground">Edit Profile Details</h3>
               <button
                 type="button"
                 onClick={() => setIsEditUserModalOpen(false)}
-                className="rounded-lg p-1 text-slate-400 hover:text-white"
+                className="rounded-lg p-1 text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
             <form onSubmit={handleSaveAccountModal} className="mt-4 space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-slate-300">
+                <label className="mb-1.5 block text-xs font-medium text-foreground">
                   Full Name
                 </label>
                 <input
@@ -751,11 +796,11 @@ export const Settings = () => {
                   required
                   value={editUserName}
                   onChange={(e) => setEditUserName(e.target.value)}
-                  className="w-full rounded-xl border border-slate-700 bg-[#070B14] px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-slate-300">
+                <label className="mb-1.5 block text-xs font-medium text-foreground">
                   Username
                 </label>
                 <input
@@ -763,21 +808,21 @@ export const Settings = () => {
                   required
                   value={editUserUsername}
                   onChange={(e) => setEditUserUsername(e.target.value)}
-                  className="w-full rounded-xl border border-slate-700 bg-[#070B14] px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div className="flex justify-end gap-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setIsEditUserModalOpen(false)}
-                  className="rounded-xl px-4 py-2 text-xs font-medium text-slate-400 hover:text-white"
+                  className="rounded-xl px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updatingProfile}
-                  className="rounded-xl bg-[#0066FF] px-5 py-2 text-xs font-semibold text-white shadow-lg shadow-blue-600/30 hover:bg-blue-600 transition-colors disabled:opacity-50"
+                  className="rounded-xl bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground shadow-md hover:bg-primary/90 transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   {updatingProfile ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -792,9 +837,9 @@ export const Settings = () => {
       {/* ============================================================ */}
       {isPasswordModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-[#0B1220] p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-              <h3 className="text-lg font-bold text-white">Change Password</h3>
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between pb-4 border-b border-border">
+              <h3 className="text-lg font-bold text-foreground">Change Password</h3>
               <button
                 type="button"
                 onClick={() => {
@@ -803,14 +848,14 @@ export const Settings = () => {
                   setShowNewPassword(false);
                   setShowConfirmPassword(false);
                 }}
-                className="rounded-lg p-1 text-slate-400 hover:text-white"
+                className="rounded-lg p-1 text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
             <form onSubmit={handleChangePassword} className="mt-4 space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-slate-300">
+                <label className="mb-1.5 block text-xs font-medium text-foreground">
                   Current Password
                 </label>
                 <div className="relative">
@@ -822,12 +867,12 @@ export const Settings = () => {
                     onChange={(e) =>
                       setPasswordForm((p) => ({ ...p, currentPassword: e.target.value }))
                     }
-                    className="w-full rounded-xl border border-slate-700 bg-[#070B14] pl-4 pr-10 py-2.5 text-sm text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-xl border border-border bg-background pl-4 pr-10 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors focus:outline-none p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none p-1 cursor-pointer"
                     aria-label={showCurrentPassword ? 'Hide password' : 'Show password'}
                   >
                     {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -835,7 +880,7 @@ export const Settings = () => {
                 </div>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-slate-300">
+                <label className="mb-1.5 block text-xs font-medium text-foreground">
                   New Password
                 </label>
                 <div className="relative">
@@ -847,12 +892,12 @@ export const Settings = () => {
                     onChange={(e) =>
                       setPasswordForm((p) => ({ ...p, newPassword: e.target.value }))
                     }
-                    className="w-full rounded-xl border border-slate-700 bg-[#070B14] pl-4 pr-10 py-2.5 text-sm text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-xl border border-border bg-background pl-4 pr-10 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors focus:outline-none p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none p-1 cursor-pointer"
                     aria-label={showNewPassword ? 'Hide password' : 'Show password'}
                   >
                     {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -860,7 +905,7 @@ export const Settings = () => {
                 </div>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-slate-300">
+                <label className="mb-1.5 block text-xs font-medium text-foreground">
                   Confirm New Password
                 </label>
                 <div className="relative">
@@ -872,12 +917,12 @@ export const Settings = () => {
                     onChange={(e) =>
                       setPasswordForm((p) => ({ ...p, confirmPassword: e.target.value }))
                     }
-                    className="w-full rounded-xl border border-slate-700 bg-[#070B14] pl-4 pr-10 py-2.5 text-sm text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full rounded-xl border border-border bg-background pl-4 pr-10 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors focus:outline-none p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none p-1 cursor-pointer"
                     aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                   >
                     {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -893,14 +938,14 @@ export const Settings = () => {
                     setShowNewPassword(false);
                     setShowConfirmPassword(false);
                   }}
-                  className="rounded-xl px-4 py-2 text-xs font-medium text-slate-400 hover:text-white"
+                  className="rounded-xl px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={changingPassword}
-                  className="rounded-xl bg-[#0066FF] px-5 py-2 text-xs font-semibold text-white shadow-lg shadow-blue-600/30 hover:bg-blue-600 transition-colors disabled:opacity-50"
+                  className="rounded-xl bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground shadow-md hover:bg-primary/90 transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   {changingPassword ? 'Updating...' : 'Update Password'}
                 </button>
@@ -915,34 +960,34 @@ export const Settings = () => {
       {/* ============================================================ */}
       {isResetModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-[#0B1220] p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-4 border-b border-border">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <RotateCcw size={16} />
                 </div>
-                <h3 className="text-base font-bold text-white">Reset settings?</h3>
+                <h3 className="text-base font-bold text-foreground">Reset settings?</h3>
               </div>
               <button
                 type="button"
                 disabled={isResetting}
                 onClick={() => setIsResetModalOpen(false)}
-                className="rounded-lg p-1 text-slate-400 hover:text-white transition-colors disabled:opacity-50"
+                className="rounded-lg p-1 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="py-4 text-sm text-slate-300 leading-relaxed">
+            <div className="py-4 text-sm text-foreground/90 leading-relaxed">
               This will restore all your Tara Typing settings to their default values.
             </div>
 
-            <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-800/80">
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-border">
               <button
                 type="button"
                 disabled={isResetting}
                 onClick={() => setIsResetModalOpen(false)}
-                className="rounded-xl px-4 py-2 text-xs font-medium text-slate-400 hover:text-white transition-colors disabled:opacity-50"
+                className="rounded-xl px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 cursor-pointer"
               >
                 Cancel
               </button>
@@ -950,7 +995,7 @@ export const Settings = () => {
                 type="button"
                 disabled={isResetting}
                 onClick={handleConfirmReset}
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-blue-600/30 hover:bg-blue-500 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground shadow-md hover:bg-primary/90 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {isResetting ? (
                   <>

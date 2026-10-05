@@ -55,10 +55,10 @@ export const Keyboard = ({ nextChar = '', lastKey = null }) => {
             }
 
             const stateStyles = {
-              idle: 'border border-[#1E293B] bg-[#0A101D] text-slate-300 hover:border-slate-600 shadow-sm',
-              next: 'border-2 border-[#1E6BFF] bg-[#0E1A33] text-white shadow-[0_0_15px_rgba(30,107,255,0.7)] ring-1 ring-[#1E6BFF]/40 font-bold scale-[1.02]',
-              correct: 'border border-emerald-500/70 bg-emerald-500/20 text-emerald-400 font-semibold',
-              incorrect: 'border border-red-500/70 bg-red-500/20 text-red-400 font-semibold',
+              idle: 'border border-border bg-card text-foreground hover:border-primary/50 shadow-sm',
+              next: 'border-2 border-primary bg-primary/15 text-primary shadow-[0_0_15px_rgba(59,130,246,0.35)] ring-1 ring-primary/40 font-bold scale-[1.02]',
+              correct: 'border border-emerald-500/70 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-semibold',
+              incorrect: 'border border-rose-500/70 bg-rose-500/15 text-rose-600 dark:text-rose-400 font-semibold',
             }[state];
 
             return (

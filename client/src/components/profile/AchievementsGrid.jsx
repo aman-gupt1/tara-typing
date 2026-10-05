@@ -91,10 +91,10 @@ export const AchievementsGrid = ({ achievements = [] }) => {
         return (
           <div
             key={item.key}
-            className={`group relative card-glass animate-page-enter ${staggerClass} flex flex-col items-center gap-1.5 p-4 text-center rounded-2xl border border-slate-800/80 bg-[#0B132B]/60 transition-all duration-300 ease-out hover:-translate-y-1.5 cursor-default ${
+            className={`group relative card-glass animate-page-enter ${staggerClass} flex flex-col items-center gap-1.5 p-4 text-center rounded-2xl border border-border bg-card transition-all duration-300 ease-out hover:-translate-y-1.5 cursor-default ${
               earned
                 ? `${theme.border} ${theme.shadow} ${theme.bg}`
-                : 'opacity-40 hover:opacity-70 hover:border-slate-700'
+                : 'opacity-40 hover:opacity-70 hover:border-border'
             }`}
           >
             <div
@@ -107,7 +107,7 @@ export const AchievementsGrid = ({ achievements = [] }) => {
             <span className={`text-sm font-semibold text-foreground transition-colors duration-200 ${earned ? theme.textHover : ''}`}>
               {item.name}
             </span>
-            <span className="text-[11px] text-muted-foreground transition-colors group-hover:text-slate-300">
+            <span className="text-[11px] text-muted-foreground transition-colors group-hover:text-foreground">
               {earned ? 'Earned' : item.desc}
             </span>
           </div>

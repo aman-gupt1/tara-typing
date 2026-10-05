@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import {
   ArrowRight, BookOpen, Check, CirclePlay, Gauge, Globe2, Keyboard,
   LockKeyhole, Medal, ShieldCheck, Sparkles, Target, Trophy, Users, Zap,
+  Bot, Award, Flag,
 } from 'lucide-react';
 import SEO from '../components/common/SEO';
 
@@ -62,6 +63,39 @@ const features = [
     iconHover: 'group-hover:scale-110 group-hover:bg-rose-500/20 group-hover:text-rose-400 group-hover:shadow-[0_0_15px_rgba(244,63,94,0.35)]',
     titleHover: 'group-hover:text-rose-500 dark:group-hover:text-rose-300',
   },
+  {
+    icon: Flag,
+    title: 'Multiplayer Typing Race',
+    description: 'Compete live with typists and AI racers in real-time.',
+    color: 'icon-box-primary',
+    hoverBorder: 'hover:border-indigo-500/50',
+    hoverShadow: 'hover:shadow-[0_14px_32px_-6px_rgba(99,102,241,0.28)]',
+    hoverBg: 'hover:bg-gradient-to-b hover:from-indigo-500/[0.08] hover:to-transparent dark:hover:from-[#111132] dark:hover:to-[#0B1220]',
+    iconHover: 'group-hover:scale-110 group-hover:bg-indigo-500/20 group-hover:text-indigo-400 group-hover:shadow-[0_0_15px_rgba(99,102,241,0.35)]',
+    titleHover: 'group-hover:text-indigo-500 dark:group-hover:text-indigo-300',
+  },
+  {
+    icon: Bot,
+    title: 'Tara AI Typing Coach',
+    description: 'ChatGPT-mode assistant for speed drills and code analysis.',
+    color: 'icon-box-lessons',
+    hoverBorder: 'hover:border-cyan-500/50',
+    hoverShadow: 'hover:shadow-[0_14px_32px_-6px_rgba(6,182,212,0.28)]',
+    hoverBg: 'hover:bg-gradient-to-b hover:from-cyan-500/[0.08] hover:to-transparent dark:hover:from-[#091D2C] dark:hover:to-[#0B1220]',
+    iconHover: 'group-hover:scale-110 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.35)]',
+    titleHover: 'group-hover:text-cyan-500 dark:group-hover:text-cyan-300',
+  },
+  {
+    icon: Award,
+    title: 'Official Certificates',
+    description: 'Download and share verified speed completion badges.',
+    color: 'icon-box-achievements',
+    hoverBorder: 'hover:border-emerald-500/50',
+    hoverShadow: 'hover:shadow-[0_14px_32px_-6px_rgba(16,185,129,0.28)]',
+    hoverBg: 'hover:bg-gradient-to-b hover:from-emerald-500/[0.08] hover:to-transparent dark:hover:from-[#09221C] dark:hover:to-[#0B1220]',
+    iconHover: 'group-hover:scale-110 group-hover:bg-emerald-500/20 group-hover:text-emerald-400 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.35)]',
+    titleHover: 'group-hover:text-emerald-500 dark:group-hover:text-emerald-300',
+  },
 ];
 
 const reasons = [
@@ -111,9 +145,28 @@ const reasons = [
   },
 ];
 
-const guestBenefits   = ['Take typing tests', 'Practice typing', 'Learn touch typing', 'Try daily challenges', 'View public leaderboard', 'Explore the platform'];
-const accountBenefits = ['Save your test history', 'Track your progress', 'Personal dashboard', 'Achievements & badges', 'Streak tracking', 'Personalized experience'];
-const keyboardRows    = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+const guestBenefits = [
+  'Take typing tests',
+  'Practice typing',
+  'Learn touch typing',
+  'Try daily challenges',
+  'Multiplayer typing race',
+  'Tara AI Typing Coach',
+  'Earn completion certificates',
+  'View public leaderboard',
+];
+
+const accountBenefits = [
+  'Save your test history',
+  'Track your progress',
+  'Personal dashboard',
+  'Achievements & badges',
+  'Streak tracking',
+  'Saved AI chat history & pins',
+  'Multiplayer race stats',
+  'Verifiable certificate ID',
+];
+const keyboardRows = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
 
 
 /* ─── Sub-components ─────────────────────────────────────── */
@@ -285,7 +338,7 @@ export const About = () => (
       {/* 2. WHAT YOU CAN DO */}
       <section className="mx-auto max-w-7xl px-4 pb-6 pt-5 sm:px-6 sm:pb-8 sm:pt-6">
         <SectionHeading title="What You Can Do" description="Explore these features without creating an account." />
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature) => (
             <FeatureCard key={feature.title} item={feature} />
           ))}
@@ -356,6 +409,12 @@ export const About = () => (
                 className="bg-gradient-primary glow-primary inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 font-semibold text-primary-foreground transition-transform hover:scale-[1.02]"
               >
                 <CirclePlay size={18} />Start Typing Test
+              </Link>
+              <Link
+                to="/race"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3.5 font-semibold text-foreground transition-colors hover:bg-accent/10 hover:border-primary/40"
+              >
+                <Flag size={18} className="text-primary" />Multiplayer Race
               </Link>
               <Link
                 to="/practice"

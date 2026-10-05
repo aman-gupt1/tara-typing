@@ -11,6 +11,8 @@ import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { TypingProvider } from './context/TypingContext';
 import { LearnProvider } from './context/LearnContext';
+import { ChatbotProvider } from './context/ChatbotContext';
+import TypingChatbot from './components/chat/TypingChatbot';
 
 // Layout
 import Layout from './components/layout/Layout';
@@ -29,6 +31,8 @@ import Settings from './pages/Settings';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import About from './pages/About';
+import Race from './pages/Race';
+import Certificate from './pages/Certificate';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import PageTransition from './components/common/PageTransition';
@@ -99,6 +103,8 @@ function AppContent() {
             />
             <Route path="/leaderboard" element={<PageTransition><Leaderboard /></PageTransition>} />
             <Route path="/daily-challenge" element={<PageTransition><DailyChallenge /></PageTransition>} />
+            <Route path="/race" element={<PageTransition><Race /></PageTransition>} />
+            <Route path="/certificate" element={<PageTransition><Certificate /></PageTransition>} />
             <Route
               path="/dashboard"
               element={
@@ -162,6 +168,9 @@ function AppContent() {
         </AnimatePresence>
       </Layout>
 
+      {/* Global AI Typing Assistant Chatbot Widget */}
+      <TypingChatbot />
+
       {/* Centralized Toast Notifications matching active theme & refined animation */}
       <ToastContainer
         transition={taraToastTransition}
@@ -193,7 +202,9 @@ function App() {
           <SettingsProvider>
             <TypingProvider>
               <LearnProvider>
-                <AppContent />
+                <ChatbotProvider>
+                  <AppContent />
+                </ChatbotProvider>
               </LearnProvider>
             </TypingProvider>
           </SettingsProvider>
