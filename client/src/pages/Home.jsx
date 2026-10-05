@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Keyboard, Target, Zap, Trophy, BookOpen, Users } from 'lucide-react';
+import { Keyboard, Target, Zap, Trophy, BookOpen, Users, Sparkles } from 'lucide-react';
 import SEO from '../components/common/SEO';
 import statsService from '../services/statsService';
 import { formatCompactNumber } from '../utils/formatters';
@@ -186,9 +186,12 @@ export const Home = () => {
           <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
             {/* Left Hero Content */}
             <div className="animate-in fade-in slide-in-from-bottom-6 duration-700">
-              <p className="hero-tagline-badge mb-3 relative inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-4 py-1 text-xs font-medium text-primary select-none">
+              <p className="hero-tagline-badge mb-3 relative inline-flex items-center rounded-full border border-primary/40 bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary select-none">
                 <span className="hero-border-beam" aria-hidden="true" />
-                <span className="relative z-10">Free Online Typing Test</span>
+                <span className="relative z-10 flex items-center gap-1.5">
+                  <Sparkles size={13} className="text-primary animate-pulse" />
+                  Next-Gen AI Typing Platform
+                </span>
               </p>
               
               <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
@@ -196,11 +199,11 @@ export const Home = () => {
                 <br />
                 Think Sharper.
                 <br />
-                <span className="text-gradient">Achieve More.</span>
+                <span className="text-gradient">Powered by AI.</span>
               </h1>
 
               <p className="mt-5 max-w-md text-base text-muted-foreground sm:text-lg">
-                Test your typing speed, improve accuracy and track your progress with Tara Typing.
+                The intelligent touch-typing platform with real-time analytics, adaptive lessons, and personalized AI coaching.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
