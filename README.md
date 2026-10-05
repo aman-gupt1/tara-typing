@@ -2,7 +2,7 @@
 
 <div align="center">
 
-> *"Type Faster. Think Sharper. Master Touch Typing with Real-Time Precision & AI Coaching."*
+> *"Type Faster. Think Sharper. Powered by AI — Master Touch Typing with Real-Time Precision & AI Coaching."*
 
 [![React](https://img.shields.io/badge/React-18.3-blue.svg?logo=react)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.4-purple.svg?logo=vite)](https://vitejs.dev/)
